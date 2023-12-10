@@ -48,7 +48,7 @@ class MovieSelectionAPI(APIView):
             return Response(serializer.data)
         else:
             #Load trained LSTM Model, tokens
-            m = load_model('D:/CineLyric/Intermediate_lstm_model_II.h5')
+            m = load_model('D:/CineLyric/Defense_lstm_model_III.h5')
             with open('D:/CineLyric/LSTM_token_model.pkl', 'rb') as f:
                 token, max_length = pickle.load(f)
 
