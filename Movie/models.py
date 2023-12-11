@@ -8,3 +8,5 @@ class MovieQuotes(models.Model):
     year = models.CharField(max_length=255)
 
 
+    def __str__(self) -> str:
+        return self.movie

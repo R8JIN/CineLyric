@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'Accounts',
     'rest_framework.authtoken',
     'Movie',
+    'Song',
     'csvimport.app.CSVImportConf',
 ]
 

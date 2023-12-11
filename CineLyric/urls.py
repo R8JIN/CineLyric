@@ -18,6 +18,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from Accounts.views import RegistrationAPI, LoginAPI
 from Movie.views import MovieSelectionAPI
+from Song.views import SongSelectionAPI
 
 # router = DefaultRouter()
 # router.register('register', RegistrationAPI, basename='Registration')
@@ -25,5 +26,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('registration/', RegistrationAPI.as_view(), name="Registration"),
     path('login/', LoginAPI.as_view(), name="Login"),
-    path('movie/', MovieSelectionAPI.as_view(), name="Movie")
+    path('movie/', MovieSelectionAPI.as_view(), name="Movie"),
+    path('song/', SongSelectionAPI.as_view(), name='SongAPI'),
 ]

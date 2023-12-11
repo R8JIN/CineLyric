@@ -16,7 +16,7 @@ from .serializer import MovieSerializer, QuoteSerializer
 
 
 # request data type s{"quote": "<quotation>"} 
-# header: 'Authentication Token $tokenkey'
+# header: 'Authentication: Token $tokenkey'
 class MovieSelectionAPI(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
