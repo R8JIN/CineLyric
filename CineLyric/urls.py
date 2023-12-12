@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from Accounts.views import RegistrationAPI, LoginAPI
-from Movie.views import MovieSelectionAPI
+from Movie.views import MovieSelectionAPI, MovieHistoryAPI
 from Song.views import SongSelectionAPI
 
 # router = DefaultRouter()
@@ -28,4 +28,5 @@ urlpatterns = [
     path('login/', LoginAPI.as_view(), name="Login"),
     path('movie/', MovieSelectionAPI.as_view(), name="Movie"),
     path('song/', SongSelectionAPI.as_view(), name='SongAPI'),
+    path('moviehistory/', MovieHistoryAPI.as_view(), name="MovieHistory")
 ]
