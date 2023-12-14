@@ -14,6 +14,7 @@ from .models import MovieQuotes, MovieSearchHistory
 from .serializer import MovieSerializer, QuoteSerializer, MovieSearchHistorySerializer
 from rest_framework.authtoken.models import Token
 from Accounts.models import *
+from Accounts.serializer import UserHistorySerializer
 from rest_framework import status
 
 # Create your views here.
@@ -48,17 +49,22 @@ class MovieSelectionAPI(APIView):
         score = cosine.reshape(-1)
         max = cosine.argmax()
         print("The cosine similarity score is {0}".format(score[max]))
-
+        
         # threshold value: 0.9
         if score[max]>0.9:
-
+            
             #Serialization
             movie = MovieQuotes.objects.get(id=max+1)
             serializer = MovieSerializer(movie)
 
-            #Save user search in history
+            #Save user search in  movie history model
             history = MovieSearchHistory(user_quote=quote, user=user, movie=movie)
             history.save()
+
+            #Save user search in user history model
+            user_history = SearchHistory(user=user, user_query=quote, search_id=max+1, search_type="movie")
+            print(user_history)
+            user_history.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             #Load trained LSTM Model, tokens
@@ -78,7 +84,7 @@ class MovieSelectionAPI(APIView):
             print("The lstm score is {0}".format(score[id]))
 
             #threshold value: 0.3
-            if score[id] > 0.3:
+            if score[id] > 0.5:
                 predicted_movie_name = MovieQuotes.objects.get(id=id+1)
                 serializer = MovieSerializer(predicted_movie_name)
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -93,7 +99,8 @@ class MovieSelectionAPI(APIView):
                 "year": "2008",
             }
             """
-        
+
+   
 class MovieHistoryAPI(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -107,3 +114,12 @@ class MovieHistoryAPI(APIView):
             serializer = MovieSearchHistorySerializer(history, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({"message": "No Search History"}, status=status.HTTP_404_NOT_FOUND)
+        """ Response format
+        [
+            {
+                "id": 2,
+                "movie": 64,
+                "user": 2,
+                "user_quote": "may the force be with you"
+            }
+        ]""" 

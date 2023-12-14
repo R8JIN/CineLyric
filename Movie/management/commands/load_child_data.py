@@ -25,7 +25,7 @@ class Command(BaseCommand):
             return
             
         # Show this before loading the data into the database
-        print("Loading childrens data")
+        print("Loading movie data")
 
 
         #Code to load the data into database

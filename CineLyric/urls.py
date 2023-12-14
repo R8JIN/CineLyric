@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from Accounts.views import RegistrationAPI, LoginAPI
+from Accounts.views import RegistrationAPI, LoginAPI, SearchHistoryAPI
 from Movie.views import MovieSelectionAPI, MovieHistoryAPI
 from Song.views import SongSelectionAPI
 
@@ -28,5 +28,6 @@ urlpatterns = [
     path('login/', LoginAPI.as_view(), name="Login"),
     path('movie/', MovieSelectionAPI.as_view(), name="Movie"),
     path('song/', SongSelectionAPI.as_view(), name='SongAPI'),
-    path('moviehistory/', MovieHistoryAPI.as_view(), name="MovieHistory")
+    path('moviehistory/', MovieHistoryAPI.as_view(), name="MovieHistory"),
+    path('history/', SearchHistoryAPI.as_view(), name="SearhHistory"),
 ]
