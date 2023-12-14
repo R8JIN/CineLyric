@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from .serializer import AccountSerializer, LoginSerializer
-from .models import User
+from .serializer import AccountSerializer, LoginSerializer, UserHistorySerializer
+from .models import User, SearchHistory
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -8,6 +8,7 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
+
 # Create your views here.
 
 
@@ -82,6 +83,30 @@ class LoginAPI(APIView):
         return Response(response, status = status.HTTP_400_BAD_REQUEST)
 
 
-# class MovieIdentification(APIView):
-#     permission_classes = [IsAuthenticated]
+
+class SearchHistoryAPI(APIView):
+     permission_classes =[IsAuthenticated]
+     def get(self, request):
+        
+        user_id = Token.objects.get(key=request.auth.key).user_id
+        user = User.objects.get(id=user_id)
+        
+        user_history = SearchHistory.objects.filter(user=user)
+        if user_history is not None:
+            serializer = UserHistorySerializer(user_history, many=True)
+            return Response(serializer.data)
+        return Response({"message": "Your search is empty"})
+        
+        #API Response for Search History API
+        """[
+            {
+            "datetime": "2023-12-14T11:09:04.049982Z",
+            "id": 1,
+            "search_id": 64,
+            "search_type": "movie",
+            "user": 2,
+            "user_query": "may the force be with you"
+            }
+        ]"""
+          
     

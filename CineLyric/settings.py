@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-t4b*p7b=!yv2d!ro(@$p-m%jzf1+td34&cvrm$o!ydani-28on
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'Accounts',
     'rest_framework.authtoken',
     'Movie',
+    'Song',
     'csvimport.app.CSVImportConf',
 ]
 

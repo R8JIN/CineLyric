@@ -16,8 +16,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from Accounts.views import RegistrationAPI, LoginAPI
-from Movie.views import MovieSelectionAPI
+from Accounts.views import RegistrationAPI, LoginAPI, SearchHistoryAPI
+from Movie.views import MovieSelectionAPI, MovieHistoryAPI
+from Song.views import SongSelectionAPI
 
 # router = DefaultRouter()
 # router.register('register', RegistrationAPI, basename='Registration')
@@ -25,5 +26,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('registration/', RegistrationAPI.as_view(), name="Registration"),
     path('login/', LoginAPI.as_view(), name="Login"),
-    path('movie/', MovieSelectionAPI.as_view(), name="Movie")
+    path('movie/', MovieSelectionAPI.as_view(), name="Movie"),
+    path('song/', SongSelectionAPI.as_view(), name='SongAPI'),
+    path('moviehistory/', MovieHistoryAPI.as_view(), name="MovieHistory"),
+    path('history/', SearchHistoryAPI.as_view(), name="SearhHistory"),
 ]
