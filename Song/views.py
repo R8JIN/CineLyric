@@ -35,13 +35,23 @@ class SongSelectionAPI(APIView):
 
         #cosine similarity
         cosine = cosine_similarity(input, dv)
-        score = cosine.reshape(-1)
+        scores = list(cosine.reshape(-1))
+        scores.sort(reverse=True)
         max = cosine.argmax()
-        print("The cosine similarity score is {0}".format(score[max]))
+        print("The cosine similarity score is {0}".format(scores[max]))
+
+        #Multiple matching scores
+        count = 0
+        index = []
+        for score in scores:
+            if score != 0 and score > 0.7:
+                index.append(count)
+            count = count + 1
 
         # threshold value: 0.9
-    
-        song = SongLyric.objects.get(id=max+1)
+        
+        # song = SongLyric.objects.get(id=max+1)
+        song = SongLyric.objects.filter(pk__in = index)
         print(song)
-        serializer = SongSerializer(song)
+        serializer = SongSerializer(song, many=True)
         return Response(serializer.data)

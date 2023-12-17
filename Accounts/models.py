@@ -6,7 +6,10 @@ from rest_framework.authtoken.models import Token
 from django.conf import settings
 
 class User(AbstractUser):
-    pass
+    
+
+    def __str__(self) -> str:
+        return self.username
 # Create your models here.
 
 choices = (
@@ -23,7 +26,7 @@ def create_auth_token(sender, instance=None, created=False, **kwargs):
 class SearchHistory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     user_query = models.CharField(max_length = 255)
-    search_id = models.IntegerField()
+    # search_id = models.IntegerField()
     search_type = models.CharField(max_length=20, choices=choices, default=None)
     datetime = models.DateTimeField(auto_now=True)
 

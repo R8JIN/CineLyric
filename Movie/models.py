@@ -6,6 +6,7 @@ class MovieQuotes(models.Model):
     movie = models.CharField(max_length=255)
     type = models.CharField(max_length=255)
     year = models.CharField(max_length=255)
+    
 
 
     def __str__(self) -> str:

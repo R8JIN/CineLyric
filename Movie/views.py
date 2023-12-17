@@ -47,25 +47,50 @@ class MovieSelectionAPI(APIView):
         #cosine similarity
         cosine = cosine_similarity(input, dv)
         score = cosine.reshape(-1)
-        max = cosine.argmax()
-        print("The cosine similarity score is {0}".format(score[max]))
-        
-        # threshold value: 0.9
-        if score[max]>0.9:
-            
-            #Serialization
-            movie = MovieQuotes.objects.get(id=max+1)
-            serializer = MovieSerializer(movie)
+        max = cosine.argmax()   
+               
 
-            #Save user search in  movie history model
-            history = MovieSearchHistory(user_quote=quote, user=user, movie=movie)
-            history.save()
+# """
+#     Single Response value
+# """
+        # # threshold value: 0.9
+        # if score[max]>0.9:
+        #     #Serialization
+        #     movie = MovieQuotes.objects.get(id=max+1)
+        #     serializer = MovieSerializer(movie)
+
+        #     #Save user search in  movie history model
+        #     history = MovieSearchHistory(user_quote=quote, user=user, movie=movie)
+        #     history.save()
+
+        #     #Save user search in user history model
+        #     user_history = SearchHistory(user=user, user_query=quote, search_type="movie")
+        #     print(user_history)
+        #     user_history.save()
+        #     return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        # threshold set 0.8
+        # Multiple Movie Response
+        if score[max] > 0.8:
+            print("The cosine similarity score is {0}".format(score[max]))
+
+            index = get_movie_index(score)
+            
+            print(index)
+            #Serialization
+            # movies = MovieQuotes.objects.filter(pk__in=index)
+            movies = [MovieQuotes.objects.get(id=i) for i in index]
+            print(type(movies))
+            serializer = MovieSerializer(movies, many=True)
+
 
             #Save user search in user history model
-            user_history = SearchHistory(user=user, user_query=quote, search_id=max+1, search_type="movie")
+            user_history = SearchHistory(user=user, user_query=quote, search_type="movie")
             print(user_history)
             user_history.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)          
+
+
         else:
             #Load trained LSTM Model, tokens
             m = load_model('./Defense_lstm_model_III.h5')
@@ -84,23 +109,28 @@ class MovieSelectionAPI(APIView):
             print("The lstm score is {0}".format(score[id]))
 
             #threshold value: 0.3
-            if score[id] > 0.5:
-                predicted_movie_name = MovieQuotes.objects.get(id=id+1)
-                serializer = MovieSerializer(predicted_movie_name)
+            if score[id] > 0.3:
+
+                index = get_movie_index(score)
+                
+                # predicted_movie_name = MovieQuotes.objects.filter(pk__in=index)
+                predicted_movie_name = [MovieQuotes.objects.get(id=id) for id in index]
+                print(type(predicted_movie_name))
+                serializer = MovieSerializer(predicted_movie_name, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response({"message": "Your quote is vague to the system"}, status=status.HTTP_404_NOT_FOUND)
         """
             JSON response
-            {
+           [{
                 "id": 423,
                 "movie": "The Dark Knight",
                 "quote": "Why so serious?",
                 "type": "movie",
                 "year": "2008",
-            }
+            }]
             """
 
-   
+#obsolete for now
 class MovieHistoryAPI(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -123,3 +153,24 @@ class MovieHistoryAPI(APIView):
                 "user_quote": "may the force be with you"
             }
         ]""" 
+
+
+
+# sorting score in descending order
+def get_movie_index(score):
+    list_score = list(score)
+    dict = {}
+    count = 1
+    for ls in list_score:
+        if ls!=0 and ls > 0.2:
+            dict[count] = ls
+        count = count + 1
+
+    sort_dict = sorted(dict.items(), key=lambda x:x[1], reverse=True)
+    print(sort_dict)
+    
+    index = []
+    for keys, value in sort_dict:
+        index.append(keys)
+    return index
+    

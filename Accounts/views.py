@@ -102,7 +102,6 @@ class SearchHistoryAPI(APIView):
             {
             "datetime": "2023-12-14T11:09:04.049982Z",
             "id": 1,
-            "search_id": 64,
             "search_type": "movie",
             "user": 2,
             "user_query": "may the force be with you"
