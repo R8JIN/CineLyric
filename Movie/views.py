@@ -50,9 +50,9 @@ class MovieSelectionAPI(APIView):
         max = cosine.argmax()   
                
 
-# """
+
 #     Single Response value
-# """
+
         # # threshold value: 0.9
         # if score[max]>0.9:
         #     #Serialization
@@ -73,7 +73,6 @@ class MovieSelectionAPI(APIView):
         # Multiple Movie Response
         if score[max] > 0.8:
             print("The cosine similarity score is {0}".format(score[max]))
-
             index = get_movie_index(score)
             
             print(index)
@@ -89,8 +88,6 @@ class MovieSelectionAPI(APIView):
             print(user_history)
             user_history.save()
             return Response(serializer.data, status=status.HTTP_200_OK)          
-
-
         else:
             #Load trained LSTM Model, tokens
             m = load_model('./Defense_lstm_model_III.h5')

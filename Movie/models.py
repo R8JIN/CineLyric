@@ -7,10 +7,9 @@ class MovieQuotes(models.Model):
     type = models.CharField(max_length=255)
     year = models.CharField(max_length=255)
     
-
-
     def __str__(self) -> str:
         return self.movie
+
 
 class MovieSearchHistory(models.Model):
     movie = models.ForeignKey(MovieQuotes, on_delete=models.CASCADE)
@@ -19,3 +18,5 @@ class MovieSearchHistory(models.Model):
     datetime = models.DateTimeField(auto_now=True)
     def __str__(self) -> str:
         return f'{self.user_quote} {self.user.username}'
+    
+
