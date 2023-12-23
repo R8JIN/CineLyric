@@ -19,4 +19,12 @@ class MovieSearchHistory(models.Model):
     def __str__(self) -> str:
         return f'{self.user_quote} {self.user.username}'
     
+    
+class MovieSynopsis(models.Model):
+    imdb_id = models.CharField(max_length=255)
+    title = models.CharField(max_length=255)
+    plot_synopsis = models.TextField()
+    tags = models.CharField(max_length=255)
 
+    def __str__(self) -> str:
+        return f'{self.title}'
