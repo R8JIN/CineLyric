@@ -87,7 +87,6 @@ class LoginAPI(APIView):
 class SearchHistoryAPI(APIView):
      permission_classes =[IsAuthenticated]
      def get(self, request):
-        
         user_id = Token.objects.get(key=request.auth.key).user_id
         user = User.objects.get(id=user_id)
         
@@ -97,6 +96,7 @@ class SearchHistoryAPI(APIView):
             return Response(serializer.data)
         return Response({"message": "Your search is empty"})
         
+        #GET method with token.
         #API Response for Search History API
         """[
             {
