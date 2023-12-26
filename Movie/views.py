@@ -152,7 +152,7 @@ class MoviePlotAPI(APIView):
         score = cosine.reshape(-1)
         max = cosine.argmax() 
 
-        user_history = SearchHistory(user=user, user_query=plot, search_type="movie")
+        user_history = SearchHistory(user=user, user_query=plot, search_type="plot")
         print(user_history)
         user_history.save()
         print("The cosine similarity score is {0}".format(score[max]))

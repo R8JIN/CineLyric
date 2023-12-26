@@ -14,6 +14,7 @@ class User(AbstractUser):
 
 choices = (
     ("movie", "movie"),
+    ("plot", "plot"),
     ("music", "music")
 )
 

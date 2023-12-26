@@ -90,7 +90,7 @@ class SearchHistoryAPI(APIView):
         user_id = Token.objects.get(key=request.auth.key).user_id
         user = User.objects.get(id=user_id)
         
-        user_history = SearchHistory.objects.filter(user=user)
+        user_history = SearchHistory.objects.filter(user=user).order_by('-datetime')
         if user_history is not None:
             serializer = UserHistorySerializer(user_history, many=True)
             return Response(serializer.data)
