@@ -1,3 +1,8 @@
 movies_with_posters.csv
 scrapying.py
-db.sqlite
+<<<<<<< HEAD
+
+=======
+*.sqlite3
+500_movies.csv
+>>>>>>> branch_IV

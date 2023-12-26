@@ -10,8 +10,8 @@ from rest_framework.views import APIView
 import pickle
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
-from .models import MovieQuotes, MovieSearchHistory
-from .serializer import MovieSerializer, QuoteSerializer, MovieSearchHistorySerializer
+from .models import MovieQuotes, MovieSearchHistory, MovieSynopsis
+from .serializer import MovieSerializer, QuoteSerializer, MovieSearchHistorySerializer, PlotSerializer
 from rest_framework.authtoken.models import Token
 from Accounts.models import *
 from Accounts.serializer import UserHistorySerializer
@@ -49,10 +49,12 @@ class MovieSelectionAPI(APIView):
         score = cosine.reshape(-1)
         max = cosine.argmax()   
                
+        user_history = SearchHistory(user=user, user_query=quote, search_type="movie")
+        print(user_history)
+        user_history.save()
 
-# """
 #     Single Response value
-# """
+
         # # threshold value: 0.9
         # if score[max]>0.9:
         #     #Serialization
@@ -73,7 +75,6 @@ class MovieSelectionAPI(APIView):
         # Multiple Movie Response
         if score[max] > 0.8:
             print("The cosine similarity score is {0}".format(score[max]))
-
             index = get_movie_index(score)
             
             print(index)
@@ -85,12 +86,8 @@ class MovieSelectionAPI(APIView):
 
 
             #Save user search in user history model
-            user_history = SearchHistory(user=user, user_query=quote, search_type="movie")
-            print(user_history)
-            user_history.save()
+
             return Response(serializer.data, status=status.HTTP_200_OK)          
-
-
         else:
             #Load trained LSTM Model, tokens
             m = load_model('./Defense_lstm_model_III.h5')
@@ -129,6 +126,45 @@ class MovieSelectionAPI(APIView):
                 "year": "2008",
             }]
             """
+
+class MoviePlotAPI(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        json_data = request.body
+        stream = io.BytesIO(json_data)
+        python_data = JSONParser().parse(stream)
+        plot = python_data.get('plot')
+
+
+        #Token Authentication
+        user_id = Token.objects.get(key=request.auth.key).user_id
+        user = User.objects.get(id=user_id)
+
+        #Reading module from the pickle
+        with open('./movie_synopsis_model_1.pkl', 'rb') as f:
+            tfidf, dv = pickle.load(f)
+
+        #Preprocessing using tfidf
+        input = tfidf.transform([plot])
+
+        #cosine similarity
+        cosine = cosine_similarity(input, dv)
+        score = cosine.reshape(-1)
+        max = cosine.argmax() 
+
+        user_history = SearchHistory(user=user, user_query=plot, search_type="plot")
+        print(user_history)
+        user_history.save()
+        print("The cosine similarity score is {0}".format(score[max]))
+        if (score[max] != 0):
+            movie = MovieSynopsis.objects.get(id=max+1)
+            serializer = PlotSerializer(movie)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+            
+        return Response({'message':'Plot of user is vague'}, status=status.HTTP_400_BAD_REQUEST)
+
+        
 
 #obsolete for now
 class MovieHistoryAPI(APIView):

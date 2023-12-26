@@ -14,6 +14,7 @@ class User(AbstractUser):
 
 choices = (
     ("movie", "movie"),
+    ("plot", "plot"),
     ("music", "music")
 )
 
@@ -31,6 +32,6 @@ class SearchHistory(models.Model):
     datetime = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:
-        return self.user_query 
+        return f'{self.user.username}:' f'{self.search_type}' 
     
 

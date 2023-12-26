@@ -44,6 +44,9 @@ class SongSelectionAPI(APIView):
         max = cosine.argmax()
         print("The cosine similarity score is {0}".format(scores[max]))
 
+        music_history = SearchHistory(user=user, user_query=lyric,
+                                          search_type='music')
+        music_history.save()
         #Multiple matching scores
         # threshold value: <set the value ranging between 0-1>
         if scores[max]>0.5:
@@ -51,8 +54,7 @@ class SongSelectionAPI(APIView):
             index = get_music_index(scores)
             # song = SongLyric.objects.filter(pk__in = index)
             songs = [SongLyric.objects.get(id=i) for i in index]
-            music_history = SearchHistory(user=user, user_query=lyric,
-                                          search_type='music')
+
             print(songs)
             serializer = SongSerializer(songs, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
