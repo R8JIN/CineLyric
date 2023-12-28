@@ -10,3 +10,5 @@ class SongLyric(models.Model):
 
     def __str__(self) -> str:
         return self.track_name 
+    
+    
