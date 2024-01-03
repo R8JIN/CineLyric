@@ -30,5 +30,5 @@ urlpatterns = [
     path('song/', SongSelectionAPI.as_view(), name='SongAPI'),
     path('moviehistory/', MovieHistoryAPI.as_view(), name="MovieHistory"),
     path('history/', SearchHistoryAPI.as_view(), name="SearhHistory"),
-    path('plot_movie/', MoviePlotAPI.as_view(), name='Plot'),
+    path('plot_movie/', MoviePlotAPI.as_view(), name='Plot'),#Description-based search
 ]
