@@ -127,6 +127,10 @@ class MovieSelectionAPI(APIView):
             }]
             """
 
+# JSON REQUEST 
+# MEthod POST
+# # {'plot': <PLot info>}
+
 class MoviePlotAPI(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):
@@ -164,7 +168,15 @@ class MoviePlotAPI(APIView):
             
         return Response({'message':'Plot of user is vague'}, status=status.HTTP_400_BAD_REQUEST)
 
-        
+# JSON Response
+# {
+#     'id': 91
+#     'imdb_id': "1021092",
+#     'plot_synopsis':'sihgdkonfdkfndkfjndjf',
+#     'tags': 'Superhero', 'comic',
+#     'title': 'Iron Man'
+# }
+
 
 #obsolete for now
 class MovieHistoryAPI(APIView):

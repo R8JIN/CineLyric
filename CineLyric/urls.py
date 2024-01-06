@@ -23,12 +23,12 @@ from Song.views import SongSelectionAPI
 # router = DefaultRouter()
 # router.register('register', RegistrationAPI, basename='Registration')
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('registration/', RegistrationAPI.as_view(), name="Registration"),
-    path('login/', LoginAPI.as_view(), name="Login"),
-    path('movie/', MovieSelectionAPI.as_view(), name="Movie"),
-    path('song/', SongSelectionAPI.as_view(), name='SongAPI'),
-    path('moviehistory/', MovieHistoryAPI.as_view(), name="MovieHistory"),
-    path('history/', SearchHistoryAPI.as_view(), name="SearhHistory"),
-    path('plot_movie/', MoviePlotAPI.as_view(), name='Plot'),#Description-based search
+    path('admin/', admin.site.urls), # admin panel
+    path('registration/', RegistrationAPI.as_view(), name="Registration"), # Registration API
+    path('login/', LoginAPI.as_view(), name="Login"), # Login API
+    path('movie/', MovieSelectionAPI.as_view(), name="Movie"), # movie-based search
+    path('song/', SongSelectionAPI.as_view(), name='SongAPI'), # lyric-based search
+    path('moviehistory/', MovieHistoryAPI.as_view(), name="MovieHistory"), # obsolete
+    path('history/', SearchHistoryAPI.as_view(), name="SearhHistory"), # Search history url
+    path('plot_movie/', MoviePlotAPI.as_view(), name='Plot'), # Description-based search
 ]

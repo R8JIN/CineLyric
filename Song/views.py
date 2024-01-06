@@ -67,7 +67,7 @@ def get_music_index(score):
     dict = {}
     count = 1
     for ls in list_score:
-        if ls!=0 and ls > 0.2:
+        if ls!=0:
             dict[count] = ls
         count = count + 1
 
