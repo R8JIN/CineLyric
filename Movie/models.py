@@ -28,3 +28,13 @@ class MovieSynopsis(models.Model):
 
     def __str__(self) -> str:
         return f'{self.title}'
+
+
+class Quotation(models.Model):
+    quote = models.CharField(max_length=255)
+    movie = models.CharField(max_length=255)
+    type = models.CharField(max_length=255)
+    year = models.IntegerField()
+    poster_link = models.URLField(blank=True, null=True)
+    def __str__(self) -> str:
+        return self.movie

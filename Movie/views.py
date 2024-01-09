@@ -10,8 +10,8 @@ from rest_framework.views import APIView
 import pickle
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
-from .models import MovieQuotes, MovieSearchHistory, MovieSynopsis
-from .serializer import MovieSerializer, QuoteSerializer, MovieSearchHistorySerializer, PlotSerializer
+from .models import MovieQuotes, MovieSearchHistory, MovieSynopsis, Quotation
+from .serializer import MovieSerializer, MovieSearchHistorySerializer, PlotSerializer, QuoteSerializer
 from rest_framework.authtoken.models import Token
 from Accounts.models import *
 from Accounts.serializer import UserHistorySerializer
@@ -19,7 +19,7 @@ from rest_framework import status
 
 # Create your views here.
 
-
+# print(Quote.objects.get(id=64))
 # request data type {"quote": "<quotation>"} 
 # header: 'Authentication: Token $tokenkey'
 class MovieSelectionAPI(APIView):
@@ -36,7 +36,7 @@ class MovieSelectionAPI(APIView):
         #Token Authentication
         user_id = Token.objects.get(key=request.auth.key).user_id
         user = User.objects.get(id=user_id)
-
+        # print(Quote.objects.get(id=64))
         #Reading module from the pickle
         with open('./finalized_model_1.pkl', 'rb') as f:
             tfidf, dv = pickle.load(f)
@@ -77,15 +77,16 @@ class MovieSelectionAPI(APIView):
             print("The cosine similarity score is {0}".format(score[max]))
             index = get_movie_index(score)
             
-            print(index)
+            
             #Serialization
             # movies = MovieQuotes.objects.filter(pk__in=index)
-            movies = [MovieQuotes.objects.get(id=i) for i in index]
+            # movies = [MovieQuotes.objects.get(id=i) for i in index] # without image
+            # serializer = MovieSerializer(movies, many=True)
+
+            
+            movies = [Quotation.objects.get(id=i) for i in index] # with image
             print(type(movies))
-            serializer = MovieSerializer(movies, many=True)
-
-
-            #Save user search in user history model
+            serializer = QuoteSerializer(movies, many=True)
 
             return Response(serializer.data, status=status.HTTP_200_OK)          
         else:
@@ -111,9 +112,12 @@ class MovieSelectionAPI(APIView):
                 index = get_movie_index(score)
                 
                 # predicted_movie_name = MovieQuotes.objects.filter(pk__in=index)
-                predicted_movie_name = [MovieQuotes.objects.get(id=id) for id in index]
+                
+                # predicted_movie_name = [MovieQuotes.objects.get(id=id) for id in index] #Without image
+                # serializer = MovieSerializer(predicted_movie_name, many=True)
+                predicted_movie_name = [Quotation.objects.get(id=id) for id in index] # With image
                 print(type(predicted_movie_name))
-                serializer = MovieSerializer(predicted_movie_name, many=True)
+                serializer = QuoteSerializer(predicted_movie_name, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response({"message": "Your quote is vague to the system"}, status=status.HTTP_404_NOT_FOUND)
         """
@@ -124,6 +128,7 @@ class MovieSelectionAPI(APIView):
                 "quote": "Why so serious?",
                 "type": "movie",
                 "year": "2008",
+                "poster_link": ".jpg"
             }]
             """
 

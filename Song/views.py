@@ -11,8 +11,8 @@ from rest_framework.views import APIView
 import pickle
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
-from .models import SongLyric
-from .serializer import SongSerializer
+from .models import SongLyric, MusicLyric
+from .serializer import SongSerializer, MusicSerializer
 from  rest_framework import status
 from rest_framework.authtoken.models import Token
 from Accounts.models import SearchHistory, User
@@ -31,7 +31,7 @@ class SongSelectionAPI(APIView):
         user_id = Token.objects.get(key=request.auth.key).user_id
         user = User.objects.get(id=user_id)
         #Reading module from the pickle
-        with open('D:/CineLyric/song_model_2.pkl', 'rb') as f:
+        with open('./song_model_III.pkl', 'rb') as f:
             tfidf, dv = pickle.load(f)
 
         #Preprocessing using tfidf
@@ -49,14 +49,15 @@ class SongSelectionAPI(APIView):
         music_history.save()
         #Multiple matching scores
         # threshold value: <set the value ranging between 0-1>
-        if scores[max]>0.5:
+        if scores[max]>0.4:
         # song = SongLyric.objects.get(id=max+1)
             index = get_music_index(scores)
             # song = SongLyric.objects.filter(pk__in = index)
-            songs = [SongLyric.objects.get(id=i) for i in index]
-
-            print(songs)
-            serializer = SongSerializer(songs, many=True)
+            # songs = [SongLyric.objects.get(id=i) for i in index] #obsolete
+            # serializer = SongSerializer(songs, many=True) #obsolete
+            music = [MusicLyric.objects.get(id=i) for i in index]
+            serializer = MusicSerializer(music, many=True)
+            
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({'message':'Your query is very vague'}, status=status.HTTP_404_NOT_FOUND)
     
