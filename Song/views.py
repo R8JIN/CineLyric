@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 import pickle
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
-from .models import SongLyric, MusicLyric
+from .models import SongLyric, MusicLyric, BillBoardLyric
 from .serializer import SongSerializer, MusicSerializer
 from  rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -31,7 +31,7 @@ class SongSelectionAPI(APIView):
         user_id = Token.objects.get(key=request.auth.key).user_id
         user = User.objects.get(id=user_id)
         #Reading module from the pickle
-        with open('./song_model_III.pkl', 'rb') as f:
+        with open('./ramro_song_model.pkl', 'rb') as f:
             tfidf, dv = pickle.load(f)
 
         #Preprocessing using tfidf
@@ -49,14 +49,16 @@ class SongSelectionAPI(APIView):
         music_history.save()
         #Multiple matching scores
         # threshold value: <set the value ranging between 0-1>
-        if scores[max]>0.4:
+        if scores[max]>0.3:
         # song = SongLyric.objects.get(id=max+1)
+            print(scores[max])
             index = get_music_index(scores)
             # song = SongLyric.objects.filter(pk__in = index)
             # songs = [SongLyric.objects.get(id=i) for i in index] #obsolete
             # serializer = SongSerializer(songs, many=True) #obsolete
-            music = [MusicLyric.objects.get(id=i) for i in index]
-            serializer = MusicSerializer(music, many=True)
+            music = [BillBoardLyric.objects.get(id=i) for i in index]
+            new_music = music[0:2]
+            serializer = MusicSerializer(new_music, many=True)
             
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({'message':'Your query is very vague'}, status=status.HTTP_404_NOT_FOUND)
@@ -68,7 +70,7 @@ def get_music_index(score):
     dict = {}
     count = 1
     for ls in list_score:
-        if ls!=0:
+        if ls!=0 or ls > 0.1:
             dict[count] = ls
         count = count + 1
 

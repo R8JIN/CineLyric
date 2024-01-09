@@ -22,3 +22,13 @@ class MusicLyric(models.Model):
     def __str__(self) -> str:
         return self.track_name 
     
+class BillBoardLyric(models.Model):
+    artist_name = models.CharField(max_length=255)
+    track_name = models.CharField(max_length=255)
+    genre = models.CharField(max_length=255)
+    lyrics = models.TextField()
+    release_date = models.FloatField()
+
+    def __str__(self) -> str:
+        return self.track_name 
+    

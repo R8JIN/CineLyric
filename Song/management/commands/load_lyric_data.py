@@ -2,7 +2,7 @@ from csv import DictReader
 from django.core.management import BaseCommand
 
 # Import the model 
-from Song.models import SongLyric,MusicLyric
+from Song.models import SongLyric,MusicLyric, BillBoardLyric
 
 
 ALREDY_LOADED_ERROR_MESSAGE = """
@@ -19,7 +19,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
     
         # Show this if the data already exist in the database
-        if MusicLyric.objects.exists():
+        if BillBoardLyric.objects.exists():
             print('child data already loaded...exiting.')
             print(ALREDY_LOADED_ERROR_MESSAGE)
             return
@@ -29,7 +29,7 @@ class Command(BaseCommand):
 
 
         #Code to load the data into database
-        for row in DictReader(open('./new_song_set.csv', "r",encoding='utf-8')):
-            song = MusicLyric(artist_name=row['artist_name'], track_name=row['track_name'], genre=row['genre'], 
-                              lyrics=row['lyrics'], release_date=row['release_date'])  
+        for row in DictReader(open('./billboard_2015.csv', "r",encoding='utf-8')):
+            song = BillBoardLyric(artist_name=row['artist'], track_name=row['title'], genre=row['genre'], 
+                              lyrics=row['lyrics'], release_date=row['year'])  
             song.save()
