@@ -42,22 +42,24 @@ class SongSelectionAPI(APIView):
         scores = list(cosine.reshape(-1))
         
         max = cosine.argmax()
-        print("The cosine similarity score is {0}".format(scores[max]))
+        # print("The cosine similarity score is {0}".format(scores[max]))
 
         music_history = SearchHistory(user=user, user_query=lyric,
                                           search_type='music')
+        
         music_history.save()
         #Multiple matching scores
         # threshold value: <set the value ranging between 0-1>
-        if scores[max]>0.3:
+        if scores[max]>0.1:
         # song = SongLyric.objects.get(id=max+1)
-            print(scores[max])
+            # print(scores[max])
             index = get_music_index(scores)
             # song = SongLyric.objects.filter(pk__in = index)
             # songs = [SongLyric.objects.get(id=i) for i in index] #obsolete
             # serializer = SongSerializer(songs, many=True) #obsolete
             music = [BillBoardLyric.objects.get(id=i) for i in index]
-            new_music = music[0:2]
+        
+            new_music = music[0:4]
             serializer = MusicSerializer(new_music, many=True)
             
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -70,7 +72,7 @@ def get_music_index(score):
     dict = {}
     count = 1
     for ls in list_score:
-        if ls!=0 or ls > 0.1:
+        if ls!=0 and ls >= 0.1:
             dict[count] = ls
         count = count + 1
 

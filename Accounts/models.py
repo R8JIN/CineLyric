@@ -12,6 +12,11 @@ class User(AbstractUser):
         return self.username
 # Create your models here.
 
+
+#Flag for different search types: 
+# For quote based search, it's movie. 
+# For plot based search, flag is plot. 
+# For lyric based search, flag is music
 choices = (
     ("movie", "movie"),
     ("plot", "plot"),
@@ -33,5 +38,8 @@ class SearchHistory(models.Model):
 
     def __str__(self) -> str:
         return f'{self.user.username}:' f'{self.search_type}' 
-    
 
+
+class Bookmark(models.Model):
+    pass
+    

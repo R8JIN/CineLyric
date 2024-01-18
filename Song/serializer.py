@@ -8,5 +8,5 @@ class SongSerializer(ModelSerializer):
 class MusicSerializer(ModelSerializer):
     class Meta:
         model = BillBoardLyric
-        fields = ['track_name', 'artist_name']
+        fields = "__all__"
 

@@ -107,5 +107,10 @@ class SearchHistoryAPI(APIView):
             "user_query": "may the force be with you"
             }
         ]"""
+
+class BookmarkAPI(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        pass
           
     
