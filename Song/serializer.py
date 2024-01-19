@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from .models import SongLyric, MusicLyric, BillBoardLyric
+from .models import SongLyric, MusicLyric, BillBoardLyric, TrackLyric
 class SongSerializer(ModelSerializer):
     class Meta:
         model = SongLyric
@@ -10,3 +10,7 @@ class MusicSerializer(ModelSerializer):
         model = BillBoardLyric
         fields = "__all__"
 
+class TrackSerializer(ModelSerializer):
+    class Meta:
+        model = TrackLyric
+        fields = "__all__"

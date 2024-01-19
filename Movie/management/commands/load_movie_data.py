@@ -2,7 +2,7 @@ from csv import DictReader
 from django.core.management import BaseCommand
 
 # Import the model 
-from Movie.models import MovieQuotes, MovieSynopsis, Quotation
+from Movie.models import MovieQuoteOverview
 
 
 ALREDY_LOADED_ERROR_MESSAGE = """
@@ -19,7 +19,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
     
         # Show this if the data already exist in the database
-        if Quotation.objects.exists():
+        if MovieQuoteOverview.objects.exists():
             print('movie data already loaded...exiting.')
             print(ALREDY_LOADED_ERROR_MESSAGE)
             return
@@ -29,7 +29,9 @@ class Command(BaseCommand):
 
 
         #Code to load the data into database
-        for row in DictReader(open('./new_quote_image.csv', "r",encoding='utf-8')):
-            movie=Quotation(quote=row['quote'], movie=row['movie'], type=row['type'], year=row['year'],
-                             poster_link=row['poster_link'])  
+        for row in DictReader(open('./movie_quotes_links_ratings_overview.csv', "r",encoding='utf-8')):
+            movie=MovieQuoteOverview(quote=row['quote'], movie=row['movie'], type=row['type'], year=row['year'],
+                                youtube_link=row['youtube_links'], poster_link=row['poster_link'], genre=row['genre'], 
+                                imdb_rating=row['imdb_rating'], overview=row['overview'], metascore=row['metascore'], 
+                                director=row['director'])  
             movie.save()

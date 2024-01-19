@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'Movie',
     'Song',
-    'csvimport.app.CSVImportConf',
+    # 'csvimport.app.CSVImportConf',
 ]
 
 MIDDLEWARE = [

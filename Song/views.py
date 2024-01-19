@@ -11,8 +11,8 @@ from rest_framework.views import APIView
 import pickle
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
-from .models import SongLyric, MusicLyric, BillBoardLyric
-from .serializer import SongSerializer, MusicSerializer
+from .models import SongLyric, MusicLyric, BillBoardLyric, TrackLyric
+from .serializer import SongSerializer, MusicSerializer, TrackSerializer
 from  rest_framework import status
 from rest_framework.authtoken.models import Token
 from Accounts.models import SearchHistory, User
@@ -57,10 +57,10 @@ class SongSelectionAPI(APIView):
             # song = SongLyric.objects.filter(pk__in = index)
             # songs = [SongLyric.objects.get(id=i) for i in index] #obsolete
             # serializer = SongSerializer(songs, many=True) #obsolete
-            music = [BillBoardLyric.objects.get(id=i) for i in index]
+            music = [TrackLyric.objects.get(id=i) for i in index]
         
             new_music = music[0:4]
-            serializer = MusicSerializer(new_music, many=True)
+            serializer = TrackSerializer(new_music, many=True)
             
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({'message':'Your query is very vague'}, status=status.HTTP_404_NOT_FOUND)

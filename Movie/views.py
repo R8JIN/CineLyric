@@ -10,8 +10,8 @@ from rest_framework.views import APIView
 import pickle
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
-from .models import MovieQuotes, MovieSearchHistory, MovieSynopsis, Quotation
-from .serializer import MovieSerializer, MovieSearchHistorySerializer, PlotSerializer, QuoteSerializer
+from .models import MovieQuotes, MovieSearchHistory, MovieSynopsis, MovieQuoteOverview
+from .serializer import MovieSerializer, MovieSearchHistorySerializer, PlotSerializer, MovieQuoteSerializer
 from rest_framework.authtoken.models import Token
 from Accounts.models import *
 from Accounts.serializer import UserHistorySerializer
@@ -84,9 +84,9 @@ class MovieSelectionAPI(APIView):
             # serializer = MovieSerializer(movies, many=True)
 
             
-            movies = [Quotation.objects.get(id=i) for i in index] # with image
+            movies = [MovieQuoteOverview.objects.get(id=i) for i in index] # with image
             print(type(movies))
-            serializer = QuoteSerializer(movies, many=True)
+            serializer = MovieQuoteSerializer(movies, many=True)
 
             return Response(serializer.data, status=status.HTTP_200_OK)          
         else:
@@ -115,21 +115,27 @@ class MovieSelectionAPI(APIView):
                 
                 # predicted_movie_name = [MovieQuotes.objects.get(id=id) for id in index] #Without image
                 # serializer = MovieSerializer(predicted_movie_name, many=True)
-                predicted_movie_name = [Quotation.objects.get(id=id) for id in index] # With image
+                predicted_movie_name = [MovieQuoteOverview.objects.get(id=id) for id in index] # With image
                 print(type(predicted_movie_name))
-                serializer = QuoteSerializer(predicted_movie_name, many=True)
+                serializer = MovieQuoteSerializer(predicted_movie_name, many=True)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response({"message": "Your quote is vague to the system"}, status=status.HTTP_404_NOT_FOUND)
         """
             JSON response
-           [{
-                "id": 423,
-                "movie": "The Dark Knight",
-                "quote": "Why so serious?",
+            [{
+                "director": "George Lucas",
+                "genre": "Action, Adventure, Fantasy",
+                "id": 64,
+                "imdb_rating": "8.6",
+                "metascore": "90.0",
+                "movie": "Star Wars",
+                "overview": "Luke Skywalker joins forces with a Jedi Knight, a cocky pilot, a Wookiee and two droids to save the galaxy from the Empire's world-destroying battle station, while also attempting to rescue Princess Leia from the mysterious Darth Vader.",
+                "poster_link": "https://m.media-amazon.com/images/M/MV5BNzVlY2MwMjktM2E4OS00Y2Y3LWE3ZjctYzhkZGM3YzA1ZWM2XkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_UX67_CR0,0,67,98_AL_.jpg",
+                "quote": "May the Force be with you.",
                 "type": "movie",
-                "year": "2008",
-                "poster_link": ".jpg"
-            }]
+                "year": 1977,
+                "youtube_link": "https://www.youtube.com/watch?v=8Qn_spdM5Zg"
+            },]
             """
 
 # JSON REQUEST 

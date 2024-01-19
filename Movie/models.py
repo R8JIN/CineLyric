@@ -1,6 +1,8 @@
 from django.db import models
 from Accounts.models import User
 # Create your models here.
+
+#obsolete
 class MovieQuotes(models.Model):
     quote = models.CharField(max_length=255)
     movie = models.CharField(max_length=255)
@@ -38,3 +40,17 @@ class Quotation(models.Model):
     poster_link = models.URLField(blank=True, null=True)
     def __str__(self) -> str:
         return self.movie
+
+
+class MovieQuoteOverview(models.Model):
+    quote = models.CharField(max_length=255)
+    movie = models.CharField(max_length=255, blank=True, null=True, default=None)
+    type = models.CharField(max_length=255)
+    year = models.IntegerField()
+    youtube_link = models.URLField(blank=True, null=True)
+    poster_link = models.URLField(blank=True, null=True)
+    genre = models.CharField(max_length=255)
+    imdb_rating = models.CharField(max_length=255, blank=True, null=True)
+    overview = models.TextField(blank=True, null=True)
+    metascore =  models.CharField(max_length=255, blank=True, null=True)
+    director = models.CharField(max_length=255, blank=True, null=True)
