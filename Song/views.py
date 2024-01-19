@@ -17,6 +17,15 @@ from  rest_framework import status
 from rest_framework.authtoken.models import Token
 from Accounts.models import SearchHistory, User
 # Create your views here.
+
+
+"""
+JSON request
+{
+    "lyric": <input>
+}
+Authorization: Token <tokenkey>
+"""
 class SongSelectionAPI(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -64,7 +73,20 @@ class SongSelectionAPI(APIView):
             
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({'message':'Your query is very vague'}, status=status.HTTP_404_NOT_FOUND)
-    
+ #JSON Response
+    """
+    [ {
+        "album": "A Pentatonix Christmas Deluxe",
+        "artist_name": "pentatonix",
+        "genre": "[u'a cappella']",
+        "id": 654,
+        "lyrics": "purai lyrics hunxa hai"        
+        "release_date": 2017,
+        "spotify_link": "https://open.spotify.com/artist/26AHtbjWKiwYzsoGoUZq53",
+        "track_name": "Hallelujah",
+        "youtube_link": "https://www.youtube.com/watch?v=LRP8d7hhpoQ"
+    },]
+    """   
 
 #sorting music index score in descending order
 def get_music_index(score):
