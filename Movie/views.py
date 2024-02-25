@@ -48,7 +48,23 @@ class MovieSelectionAPI(APIView):
         cosine = cosine_similarity(input, dv)
         score = cosine.reshape(-1)
         max = cosine.argmax()   
-               
+        
+        # m = load_model('./Defense_lstm_model_III.h5')
+        # with open('./LSTM_token_model.pkl', 'rb') as f:
+        #     token, max_length = pickle.load(f)
+
+        # #LSTM model 
+        # new_quote_sequence = token.texts_to_sequences([quote])
+        # padded_sequence = pad_sequences(new_quote_sequence, maxlen=max_length)
+        # predicted_movie = m.predict(padded_sequence)
+
+        # score_lstm = predicted_movie.reshape(-1)
+        # Decode the predicted movie name
+    
+        # # id_lstm = np.argmax(predicted_movie, axis=-1)[0]
+        # print("The lstm score is {0}".format(score[id]))
+
+        
         user_history = SearchHistory(user=user, user_query=quote, search_type="movie")
         print(user_history)
         user_history.save()
@@ -73,7 +89,10 @@ class MovieSelectionAPI(APIView):
         
         # threshold set 0.8
         # Multiple Movie Response
+
+
         if score[max] > 0.8:
+
             print("The cosine similarity score is {0}".format(score[max]))
             index = get_movie_index(score)
             
@@ -107,7 +126,7 @@ class MovieSelectionAPI(APIView):
             print("The lstm score is {0}".format(score[id]))
 
             #threshold value: 0.3
-            if score[id] > 0.3:
+            if score[id] > 0.7:
 
                 index = get_movie_index(score)
                 

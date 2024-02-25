@@ -68,7 +68,7 @@ class SongSelectionAPI(APIView):
             # serializer = SongSerializer(songs, many=True) #obsolete
             music = [TrackLyric.objects.get(id=i) for i in index]
         
-            new_music = music[0:4]
+            new_music = music
             serializer = TrackSerializer(new_music, many=True)
             
             return Response(serializer.data, status=status.HTTP_200_OK)
