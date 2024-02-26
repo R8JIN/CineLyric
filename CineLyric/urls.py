@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from Accounts.views import RegistrationAPI, LoginAPI, SearchHistoryAPI
+from Accounts.views import RegistrationAPI, LoginAPI, SearchHistoryAPI, BookmarkAPI
 from Movie.views import MovieSelectionAPI, MovieHistoryAPI, MoviePlotAPI
 from Song.views import SongSelectionAPI
 
@@ -31,4 +31,5 @@ urlpatterns = [
     path('moviehistory/', MovieHistoryAPI.as_view(), name="MovieHistory"), # obsolete
     path('history/', SearchHistoryAPI.as_view(), name="SearhHistory"), # Search history url
     path('plot_movie/', MoviePlotAPI.as_view(), name='Plot'), # Description-based search
+    path('bookmark/',BookmarkAPI.as_view(), name="Bookmark"), #Bookmark
 ]

@@ -91,7 +91,7 @@ class MovieSelectionAPI(APIView):
         # Multiple Movie Response
 
 
-        if score[max] > 0.8:
+        if score[max] > 0.85:
 
             print("The cosine similarity score is {0}".format(score[max]))
             index = get_movie_index(score)
@@ -109,7 +109,7 @@ class MovieSelectionAPI(APIView):
 
             return Response(serializer.data, status=status.HTTP_200_OK)          
         else:
-            #Load trained LSTM Model, tokens
+            # Load trained LSTM Model, tokens
             m = load_model('./Defense_lstm_model_III.h5')
             with open('./LSTM_token_model.pkl', 'rb') as f:
                 token, max_length = pickle.load(f)
@@ -125,8 +125,8 @@ class MovieSelectionAPI(APIView):
             id = np.argmax(predicted_movie, axis=-1)[0]
             print("The lstm score is {0}".format(score[id]))
 
-            #threshold value: 0.3
-            if score[id] > 0.7:
+            #threshold value: 0.7
+            if score[id] > 0.82:
 
                 index = get_movie_index(score)
                 

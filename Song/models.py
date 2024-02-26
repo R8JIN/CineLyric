@@ -37,6 +37,8 @@ class TrackLyric(models.Model):
     artist_name = models.CharField(max_length=255)
     track_name = models.CharField(max_length=255)
     genre = models.CharField(max_length=255)
+    type = models.CharField(default="music", max_length=255)
+    
     lyrics = models.TextField()
     release_date = models.IntegerField()
     youtube_link = models.URLField(blank=True, null=True)

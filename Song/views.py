@@ -39,7 +39,6 @@ class SongSelectionAPI(APIView):
 
         user_id = Token.objects.get(key=request.auth.key).user_id
         user = User.objects.get(id=user_id)
-        #Reading module from the pickle
         with open('./ramro_song_model.pkl', 'rb') as f:
             tfidf, dv = pickle.load(f)
 

@@ -41,5 +41,11 @@ class SearchHistory(models.Model):
 
 
 class Bookmark(models.Model):
-    pass
+    user = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    bid = models.IntegerField(blank=True, null=True)
+    title = models.CharField(max_length=255, blank=True, null=True)
+    image_link = models.URLField(blank=True, null=True)
+    type = models.CharField(max_length=20, choices=choices, default=None)
+    datetime = models.DateTimeField(auto_now=True)
+
     

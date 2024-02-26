@@ -1,6 +1,8 @@
+import io
 from django.shortcuts import render
-from .serializer import AccountSerializer, LoginSerializer, UserHistorySerializer
-from .models import User, SearchHistory
+from .serializer import AccountSerializer, LoginSerializer, UserHistorySerializer, BookmarkSerializer
+from rest_framework.parsers import JSONParser
+from .models import User, SearchHistory, Bookmark
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -8,6 +10,8 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
+from Song.models import TrackLyric
+from Movie.models import Quotation
 
 # Create your views here.
 
@@ -108,9 +112,101 @@ class SearchHistoryAPI(APIView):
             }
         ]"""
 
+
+
+
+
+
+"""
+Request for Bookmark
+{
+    "id" : 1,
+    "type" : movie
+}
+"""
+
 class BookmarkAPI(APIView):
     permission_classes = [IsAuthenticated]
+
+
     def post(self, request):
-        pass
-          
-    
+        user_id = Token.objects.get(key=request.auth.key).user_id
+        user = User.objects.get(id=user_id)
+
+        json_data = request.body
+        stream = io.BytesIO(json_data)
+        python_data = JSONParser().parse(stream)
+        bid = python_data.get('id')
+        type = python_data.get('type')
+        
+        b = Bookmark.objects.filter(bid=bid, type=type, user=user).first()
+        
+        if b is None:
+            if type == "music":
+                music = TrackLyric.objects.get(id=bid)
+                bookmark = Bookmark(user=user, bid=bid, type=type, title=music.track_name)
+                bookmark.save()
+                return Response({"message": "Bookmarked"})
+            elif type == "movie":
+                movie = Quotation.objects.get(id=bid)
+                bookmark = Bookmark(user=user, bid=bid, type=type, title=movie.movie)
+                bookmark.save()
+                return Response({"message": "Bookmarked"})
+            
+            """"
+            {
+                "message": "Bookmarked"
+            }
+            """
+        return Response({'message':"Already bookmarked"})
+
+    def get(self, request):
+        user_id = Token.objects.get(key=request.auth.key).user_id
+        user = User.objects.get(id=user_id)
+        
+        bookmark = Bookmark.objects.filter(user=user).order_by('-datetime')
+        if bookmark is not None:
+            serializer = BookmarkSerializer(bookmark, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({"message": "Your search is empty"})
+    """
+    [
+    {
+        "bid": 400,
+        "datetime": "2024-02-26T13:28:20.996135Z",
+        "id": 7,
+        "image_link": null,
+        "title": "Harry Potter and the Order of the Phoenix",
+        "type": "movie",
+        "user": 3
+    },
+    {
+        "bid": 2,
+        "datetime": "2024-02-26T13:28:03.479056Z",
+        "id": 6,
+        "image_link": null,
+        "title": "Dracula",
+        "type": "movie",
+        "user": 3
+    }
+    ]"""
+    """
+Request for Bookmark
+{
+    "id" : 1,
+    "type" : movie
+}
+"""
+    def delete(self, request):
+        user_id = Token.objects.get(key=request.auth.key).user_id
+        user = User.objects.get(id=user_id)
+        json_data = request.body
+        stream = io.BytesIO(json_data)
+        python_data = JSONParser().parse(stream)
+        bid = python_data.get('id')
+
+        b = Bookmark.objects.filter(id=bid, user=user).first()
+        if b is not None:
+            b.delete()
+            return Response({"message": "Bookmark Deleted"})
+        return Response({"message":"No item to delete"}, status=status.HTTP_404_NOT_FOUND)

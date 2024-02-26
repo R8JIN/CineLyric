@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
-from .models import User, SearchHistory
+from .models import User, SearchHistory, Bookmark
 from django.contrib.auth.hashers import make_password
 
 #Serializer for Registration
@@ -24,4 +24,10 @@ class LoginSerializer(ModelSerializer):
 class UserHistorySerializer(ModelSerializer):
     class Meta:
         model = SearchHistory
+        fields = '__all__'
+
+#Serializer for Bookmark history
+class BookmarkSerializer(ModelSerializer):
+    class Meta:
+        model = Bookmark
         fields = '__all__'
