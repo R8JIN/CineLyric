@@ -146,17 +146,31 @@ class BookmarkAPI(APIView):
                 music = TrackLyric.objects.get(id=bid)
                 bookmark = Bookmark(user=user, bid=bid, type=type, title=music.track_name)
                 bookmark.save()
-                return Response({"message": "Bookmarked"})
+                serializer = BookmarkSerializer(bookmark)
+                return Response([{"message": "Bookmarked"}, serializer.data])
             elif type == "movie":
                 movie = Quotation.objects.get(id=bid)
                 bookmark = Bookmark(user=user, bid=bid, type=type, title=movie.movie)
                 bookmark.save()
-                return Response({"message": "Bookmarked"})
+                serializer = BookmarkSerializer(bookmark)
+
+                return Response([{"message": "Bookmarked"}, serializer.data])
             
             """"
-            {
-                "message": "Bookmarked"
-            }
+[
+    {
+        "message": "Bookmarked"
+    },
+    {
+        "bid": 400,
+        "datetime": "2024-02-27T10:04:23.172534Z",
+        "id": 8,
+        "image_link": null,
+        "title": "Bam",
+        "type": "music",
+        "user": 3
+    }
+]
             """
         return Response({'message':"Already bookmarked"})
 
@@ -191,10 +205,10 @@ class BookmarkAPI(APIView):
     }
     ]"""
     """
-Request for Bookmark
+Request for DELETE Bookmark
 {
     "id" : 1,
-    "type" : movie
+
 }
 """
     def delete(self, request):

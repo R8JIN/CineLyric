@@ -18,7 +18,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from Accounts.views import RegistrationAPI, LoginAPI, SearchHistoryAPI, BookmarkAPI
 from Movie.views import MovieSelectionAPI, MovieHistoryAPI, MoviePlotAPI
-from Song.views import SongSelectionAPI
+from Song.views import SongSelectionAPI, MusicRecommendationAPI
 
 # router = DefaultRouter()
 # router.register('register', RegistrationAPI, basename='Registration')
@@ -32,4 +32,5 @@ urlpatterns = [
     path('history/', SearchHistoryAPI.as_view(), name="SearhHistory"), # Search history url
     path('plot_movie/', MoviePlotAPI.as_view(), name='Plot'), # Description-based search
     path('bookmark/',BookmarkAPI.as_view(), name="Bookmark"), #Bookmark
+    path('musicRecommend/', MusicRecommendationAPI.as_view(), name="MusicRecommendation" ) #Recommendation for music
 ]
