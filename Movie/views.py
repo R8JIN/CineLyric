@@ -297,7 +297,7 @@ class MovieIdentificationAPI(APIView):
         print(similarities[0:5])
         movie_identified = []
         for i, val in similarities:
-            if val >= 0.5:
+            if val != 0:
                 movie_identified.append(DialogueMovie.objects.get(id=i+1))
         
         unique_objects_dict = {}
@@ -313,7 +313,7 @@ class MovieIdentificationAPI(APIView):
         if len(movie_identified) == 0:
             return Response({'message': 'Your query was vague to system'}, status=status.HTTP_404_NOT_FOUND)
         
-        serializer = DialogueMovieSerializer(unique_objects[0:4], many=True)
+        serializer = DialogueMovieSerializer(unique_objects[:7], many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
 

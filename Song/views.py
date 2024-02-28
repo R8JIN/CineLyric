@@ -181,7 +181,7 @@ class MusicRecommendationAPI(APIView):
             return Response({'message': 'Nothing to Recommend'}, status=status.HTTP_404_NOT_FOUND)
         # music = music[0:5]   
         # print(len(music))
-        serializer = NewTrackSerializer(unique_objects[0:6], many=True)
+        serializer = NewTrackSerializer(unique_objects[0:8], many=True)
         # print(serializer)
         return Response(serializer.data, status=status.HTTP_200_OK)
         
@@ -224,8 +224,9 @@ class TrackIdentificationAPI(APIView):
                 track_identified.append(NewTrackLyric.objects.get(id=i+1))
         
         track_identified = track_identified[0:4]
-        serializer = NewTrackSerializer(track_identified, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        if len(track_identified) != 0:
+            serializer = NewTrackSerializer(track_identified, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({'message': 'Your query is vague'})
 
 
