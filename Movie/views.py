@@ -10,13 +10,18 @@ from rest_framework.views import APIView
 import pickle
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
-from .models import MovieQuotes, MovieSearchHistory, MovieSynopsis, MovieQuoteOverview
-from .serializer import MovieSerializer, MovieSearchHistorySerializer, PlotSerializer, MovieQuoteSerializer
+from .models import MovieQuotes, MovieSearchHistory, MovieSynopsis, MovieQuoteOverview, DialogueMovie
+from .serializer import MovieSerializer, MovieSearchHistorySerializer, PlotSerializer, MovieQuoteSerializer, DialogueMovieSerializer
 from rest_framework.authtoken.models import Token
 from Accounts.models import *
 from Accounts.serializer import UserHistorySerializer
 from rest_framework import status
-
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from .tfidf import TFIDFVectorizer, cosine_similarity as calculate
+from .onehotencode import OneHotEncoder
+import nltk
+nltk.download('stopwords')
 # Create your views here.
 
 # print(Quote.objects.get(id=64))
@@ -251,4 +256,192 @@ def get_movie_index(score):
     for keys, value in sort_dict:
         index.append(keys)
     return index
+
+
+
+import pickle
+
+with open("./movie_models/movie_scratch_model.pkl", 'rb') as f:
+    vectorizer = pickle.load(f)
+
+
+class MovieIdentificationAPI(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        #Json To Python Raw data
+        json_data = request.body
+        stream = io.BytesIO(json_data)
+        python_data = JSONParser().parse(stream)
+        quote = python_data.get('quote')
+
+        #Token Authentication
+        user_id = Token.objects.get(key=request.auth.key).user_id
+        user = User.objects.get(id=user_id)
+        # print(Quote.objects.get(id=64))
+        # vectorizer = TFIDFVectorizer(quote)
+        movie_objects = DialogueMovie.objects.all()
+        movie_quotes = [ob.quote for ob in movie_objects]
+        input_document = quote
+        input_vector = vectorizer.transform(input_document)
+        document_vectors = [vectorizer.transform(q) for q in movie_quotes]
+        # similarities = [cosine_similarity(input_vector, doc_vector) for doc_vector in document_vectors]
+        similarities = []
+        for i, doc_vector in enumerate(document_vectors):
+            similarity = calculate(input_vector, doc_vector)
+            similarities.append((i, similarity))
+            
+        similarities.sort(key=lambda x: x[1], reverse=True)
+
+        # Print the most similar document
+
+        print(similarities[0:5])
+        movie_identified = []
+        for i, val in similarities:
+            if val >= 0.4:
+                movie_identified.append(DialogueMovie.objects.get(id=i+1))
+        
+        unique_objects_dict = {}
+        
+        for obj in movie_identified:
+
+            lowercase_name = obj.movie.lower().strip()
+            unique_objects_dict[lowercase_name] = obj
+        
+        unique_objects = list(unique_objects_dict.values())
+
+
+        if len(movie_identified) == 0:
+            return Response({'message': 'Your query was vague to system'}, status=status.HTTP_404_NOT_FOUND)
+        
+        serializer = DialogueMovieSerializer(unique_objects[0:4], many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+
+with open('./movie_models/movie_recommend_model_II.pkl', 'rb') as f:
+    encoder = pickle.load(f)
+
+class MovieRecommendationAPI(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        #Json To Python Raw data
+        json_data = request.body
+        stream = io.BytesIO(json_data)
+        python_data = JSONParser().parse(stream)
+        genre = python_data.get('genre')
+        id = python_data.get('id')
+
+        id_movie = DialogueMovie.objects.get(id=id)
+        # s = set()
+        # # s.update(genre.split(','))
+        movie_ob = DialogueMovie.objects.all()
+        movie_genre = [ob.genre for ob in movie_ob]
+        #Token Authentication
+        user_id = Token.objects.get(key=request.auth.key).user_id
+        user = User.objects.get(id=user_id)
+
+        genres = set()
+        for item in movie_genre:
+            genres.update(item.split(','))
+
+        
+
+        genre_encoded = encoder.transform(genre)
+        print("genre encoded: ", genre_encoded)
+        # Perform one-hot encoding
+        encoded_data = []
+        for item in movie_genre:
+            encoded_data.append(encoder.transform(item))
+        print(encoded_data[0])
+        similarities = []
+        for i, doc in enumerate(encoded_data):
+             similarity = calculate(genre_encoded, doc)
+             similarities.append((i, similarity))
+
+        similarities.sort(key=lambda x: x[1], reverse=True)
+        print(similarities)
+
+        movie_recommend = []
+        for i, val in similarities:
+            movie_recommend.append(DialogueMovie.objects.get(id=i+1))
+        
+        unique_objects_dict = {}
+
+        
+        for obj in movie_recommend:
+            if obj.id == id_movie.id:
+                continue
+            
+            normalized_name = ' '.join(obj.movie.split())
+            lowercase_name = normalized_name.lower().strip()
+            unique_objects_dict[lowercase_name] = obj
+
+
+
+        
+        unique_objects = list(unique_objects_dict.values())
+        recommend = [u for u in unique_objects if u.year>id_movie.year]
+        if len(recommend) == 0:
+            return Response({'message': 'Nothing to Recommend'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = DialogueMovieSerializer(recommend[0:4], many=True )
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+#DialogueBasedSearch
+class DialogueIdentifyMovieAPI(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        #Json To Python Raw data
+        json_data = request.body
+        stream = io.BytesIO(json_data)
+        python_data = JSONParser().parse(stream)
+        quote = python_data.get('quote')
+
+        #Token Authentication
+        user_id = Token.objects.get(key=request.auth.key).user_id
+        user = User.objects.get(id=user_id)
+        # print(Quote.objects.get(id=64))
+        #Reading module from the pickle
+        with open('./movie_models/movie_vector_module.pkl', 'rb') as f:
+            tfidf, dv = pickle.load(f)
+
+        #Preprocessing using tfidf
+        input = tfidf.transform([quote])
+
+        #cosine similarity
+        cosine = cosine_similarity(input, dv)
+        score = cosine.reshape(-1)
+        max = cosine.argmax()   
+        
+        user_history = SearchHistory(user=user, user_query=quote, search_type="movie")
+        print(user_history)
+        user_history.save()
+
+        if score[max] > 0.6:
+
+            print("The cosine similarity score is {0}".format(score[max]))
+            index = get_movie_index(score)
+            
+           
+            movies = [DialogueMovie.objects.get(id=i) for i in index] # with image
+            unique_objects_dict = {}
+        
+            for obj in movies:
+                normalized_name = ' '.join(obj.movie.split())
+                lowercase_name = normalized_name.lower().strip()
+                unique_objects_dict[lowercase_name] = obj
+            
+            unique_objects = list(unique_objects_dict.values())
+            # print(type(movies))
+            serializer = DialogueMovieSerializer(unique_objects, many=True)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'messsage': 'Your query is vague to system'}, status=status.HTTP_404_NOT_FOUND )
     

@@ -1,8 +1,11 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
-from .models import MovieQuotes, MovieSearchHistory, MovieSynopsis, Quotation, MovieQuoteOverview
+from .models import MovieQuotes, MovieSearchHistory, MovieSynopsis, Quotation, MovieQuoteOverview, DialogueMovie
 
-
+class DialogueMovieSerializer(ModelSerializer):
+    class Meta:
+        model = DialogueMovie
+        fields = "__all__"
 class MovieQuoteSerializer(ModelSerializer):
     class Meta:
         model = MovieQuoteOverview

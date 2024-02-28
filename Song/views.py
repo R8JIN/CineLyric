@@ -1,26 +1,27 @@
 from django.shortcuts import render
 import io
 import numpy as np
-from keras.models import load_model
-from keras.preprocessing.sequence import pad_sequences
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 import pickle
-from .tfidf import TFIDFVectorizer, CountVectorizer, OneHotEncoder, cosine_similarity as cs
+from .songTFIDF import TFIDFVectorizer, cosine_similarity as cosine
+from .tfidf import  OneHotEncoder, cosine_similarity as cs
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
-from .models import SongLyric, MusicLyric, BillBoardLyric, TrackLyric
-from .serializer import SongSerializer, MusicSerializer, TrackSerializer
+from .models import  BillBoardLyric, TrackLyric, NewTrackLyric
+from .serializer import  MusicSerializer, TrackSerializer, NewTrackSerializer
 from  rest_framework import status
 from rest_framework.authtoken.models import Token
 from Accounts.models import SearchHistory, User
 # Create your views here.
 
  # Handle division by zero
-
+import pickle
+with open("./mock_up_music_model.pkl", "rb") as f:
+    vectorizer = pickle.load(f)
 """
 JSON request
 {
@@ -164,4 +165,56 @@ class MusicRecommendationAPI(APIView):
         
        
  
+
+
+class TrackIdentificationAPI(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        #Json To Python Raw data
+        json_data = request.body
+        stream = io.BytesIO(json_data)
+        python_data = JSONParser().parse(stream)
+        lyric = python_data.get('lyric')
+
+        track = NewTrackLyric.objects.all()
+        track_lyric = [t.lyrics for t in track]
+        cleaned_lyrics = lyrics_clean(track_lyric)
+
+        print(cleaned_lyrics[0])
+        verse_vector = vectorizer.transform(lyric)
+
+        similarities = []
+        for i, doc in enumerate(cleaned_lyrics):
+            doc_vector = vectorizer.transform(doc)
+            similarity = cs(verse_vector, doc_vector)
+            similarities.append((i, similarity))
+        similarities.sort(key=lambda x: x[1], reverse=True)
+        
+        index, max = similarities[0]
+        print(similarities[:10])
+        track_identified = []
+        for i, scores in similarities:
+            # print(i)
+            if scores > 0.1:
+                track_identified.append(NewTrackLyric.objects.get(id=i+1))
+        
+        track_identified = track_identified[0:5]
+        serializer = NewTrackSerializer(track_identified, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'message': 'Your query is vague'})
+
+
+
+
+def lyrics_clean(track_lyric):
+    cleaned_lyrics = []
+    for sample in track_lyric:
+        if isinstance(sample, str):
+            cleaned_lyrics.append(sample.replace('\n', ' '))
+        else:
+            cleaned_lyrics.append(str(sample))
+    return cleaned_lyrics
+        
 

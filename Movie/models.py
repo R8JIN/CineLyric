@@ -12,7 +12,7 @@ class MovieQuotes(models.Model):
     def __str__(self) -> str:
         return self.movie
 
-
+#obsolete
 class MovieSearchHistory(models.Model):
     movie = models.ForeignKey(MovieQuotes, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -43,6 +43,20 @@ class Quotation(models.Model):
 
 
 class MovieQuoteOverview(models.Model):
+    quote = models.CharField(max_length=255)
+    movie = models.CharField(max_length=255, blank=True, null=True, default=None)
+    type = models.CharField(max_length=255)
+    year = models.IntegerField()
+    youtube_link = models.URLField(blank=True, null=True)
+    poster_link = models.URLField(blank=True, null=True)
+    genre = models.CharField(max_length=255)
+    imdb_rating = models.CharField(max_length=255, blank=True, null=True)
+    overview = models.TextField(blank=True, null=True)
+    metascore =  models.CharField(max_length=255, blank=True, null=True)
+    director = models.CharField(max_length=255, blank=True, null=True)
+
+
+class DialogueMovie(models.Model):
     quote = models.CharField(max_length=255)
     movie = models.CharField(max_length=255, blank=True, null=True, default=None)
     type = models.CharField(max_length=255)

@@ -17,8 +17,8 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from Accounts.views import RegistrationAPI, LoginAPI, SearchHistoryAPI, BookmarkAPI
-from Movie.views import MovieSelectionAPI, MovieHistoryAPI, MoviePlotAPI
-from Song.views import SongSelectionAPI, MusicRecommendationAPI
+from Movie.views import MovieSelectionAPI, MovieHistoryAPI, MoviePlotAPI, MovieIdentificationAPI, MovieRecommendationAPI, DialogueIdentifyMovieAPI
+from Song.views import SongSelectionAPI, MusicRecommendationAPI, TrackIdentificationAPI
 
 # router = DefaultRouter()
 # router.register('register', RegistrationAPI, basename='Registration')
@@ -26,11 +26,16 @@ urlpatterns = [
     path('admin/', admin.site.urls), # admin panel
     path('registration/', RegistrationAPI.as_view(), name="Registration"), # Registration API
     path('login/', LoginAPI.as_view(), name="Login"), # Login API
-    path('movie/', MovieSelectionAPI.as_view(), name="Movie"), # movie-based search
+    
+    path('movie/', MovieSelectionAPI.as_view(), name="Movie"),#obsolete 
     path('song/', SongSelectionAPI.as_view(), name='SongAPI'), # lyric-based search
     path('moviehistory/', MovieHistoryAPI.as_view(), name="MovieHistory"), # obsolete
     path('history/', SearchHistoryAPI.as_view(), name="SearhHistory"), # Search history url
     path('plot_movie/', MoviePlotAPI.as_view(), name='Plot'), # Description-based search
     path('bookmark/',BookmarkAPI.as_view(), name="Bookmark"), #Bookmark
-    path('musicRecommend/', MusicRecommendationAPI.as_view(), name="MusicRecommendation" ) #Recommendation for music
+    path('musicRecommend/', MusicRecommendationAPI.as_view(), name="MusicRecommendation" ), #Recommendation for music
+    path('track/', TrackIdentificationAPI.as_view(), name='TrackAPI'), 
+    path('api/movie/', MovieIdentificationAPI.as_view(), name='MovieIdAPi'), # new api for dialogue-based search
+    path('api/movieSearch/', DialogueIdentifyMovieAPI.as_view(), name='MoiveSearchAPI'), #new api for dialogue-based search II
+    path('api/recommend/', MovieRecommendationAPI.as_view(), name='MovieRecommend') # recommend movie
 ]
