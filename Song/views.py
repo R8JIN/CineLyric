@@ -29,6 +29,7 @@ JSON request
 }
 Authorization: Token <tokenkey>
 """
+
 class SongSelectionAPI(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -42,7 +43,7 @@ class SongSelectionAPI(APIView):
 
         user_id = Token.objects.get(key=request.auth.key).user_id
         user = User.objects.get(id=user_id)
-        with open('./ramro_song_model.pkl', 'rb') as f:
+        with open('./music_models/music_tfidf_module.pkl', 'rb') as f:
             tfidf, dv = pickle.load(f)
 
         #Preprocessing using tfidf
@@ -68,10 +69,10 @@ class SongSelectionAPI(APIView):
             # song = SongLyric.objects.filter(pk__in = index)
             # songs = [SongLyric.objects.get(id=i) for i in index] #obsolete
             # serializer = SongSerializer(songs, many=True) #obsolete
-            music = [TrackLyric.objects.get(id=i) for i in index]
+            music = [NewTrackLyric.objects.get(id=i) for i in index]
         
-            new_music = music
-            serializer = TrackSerializer(new_music, many=True)
+            new_music = music[0:5]
+            serializer = NewTrackSerializer(new_music, many=True)
             
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({'message':'Your query is very vague'}, status=status.HTTP_404_NOT_FOUND)
@@ -109,6 +110,13 @@ def get_music_index(score):
     return index
 
 
+
+
+#Genre-based Recommendation
+
+with open("./music_models/music_recommendation_model.pkl", "rb") as f:
+    encoder , encoded_data = pickle.load(f)
+
 class MusicRecommendationAPI(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -124,6 +132,12 @@ class MusicRecommendationAPI(APIView):
         track = TrackLyric.objects.get(id=id)
         tracks = TrackLyric.objects.all()
         documents = [t.genre  for t in tracks]
+
+        genre_encoded = encoder.transform(genre)
+        similarities = []
+        for i, doc in enumerate(encoded_data):
+            similarity = cs(genre_encoded, doc)
+            similarities.append((i, similarity))
         # genres = set()
         # print(documents[0:4])
         
@@ -138,15 +152,6 @@ class MusicRecommendationAPI(APIView):
         #     similarity = cs(encode_genre, doc)
         #     similarities.append((i, similarity))
         
-        vectorizer = CountVectorizer(documents)
-        tf_genre = vectorizer.transform(genre)
-        document_genre =[vectorizer.transform(doc) for doc in documents]
-
-            # print(tf_genre)
-        similarities = []
-        for i, doc in enumerate(document_genre):
-            similarity = cs(tf_genre, doc)
-            similarities.append((i, similarity))
 
         similarities.sort(key=lambda x: x[1], reverse=True)
         print(similarities[:10])
@@ -154,17 +159,35 @@ class MusicRecommendationAPI(APIView):
         for i, scores in similarities:
             # print(i)
             if scores > 0.7:
-                music.append(TrackLyric.objects.get(id=i))
+                music.append(TrackLyric.objects.get(id=i+1))
+
+        unique_objects_dict = {}
+
+        
+        for obj in music:
+            if obj.id == track.id:
+                continue
+            
+            normalized_name = ' '.join(obj.track_name.split())
+            lowercase_name = normalized_name.lower().strip()
+            unique_objects_dict[lowercase_name] = obj
 
 
+
+        
+        unique_objects = list(unique_objects_dict.values())
+        recommend = [u for u in unique_objects if u.release_date>=track.release_date]
+        if len(recommend) == 0:
+            return Response({'message': 'Nothing to Recommend'}, status=status.HTTP_404_NOT_FOUND)
         # music = music[0:5]   
         # print(len(music))
-        serializer = TrackSerializer(music, many=True)
+        serializer = TrackSerializer(unique_objects[0:4], many=True)
         # print(serializer)
         return Response(serializer.data, status=status.HTTP_200_OK)
         
        
- 
+with open("./music_models/track_model_for_mock_up.pkl", "rb") as f:
+    vectorizer, doc_vector = pickle.load(f)
 
 
 class TrackIdentificationAPI(APIView):
@@ -178,17 +201,17 @@ class TrackIdentificationAPI(APIView):
         python_data = JSONParser().parse(stream)
         lyric = python_data.get('lyric')
 
-        track = NewTrackLyric.objects.all()
-        track_lyric = [t.lyrics for t in track]
-        cleaned_lyrics = lyrics_clean(track_lyric)
+        # track = NewTrackLyric.objects.all()
+        # track_lyric = [t.lyrics for t in track]
+        # cleaned_lyrics = lyrics_clean(track_lyric)
 
-        print(cleaned_lyrics[0])
+        # print(cleaned_lyrics[0])
         verse_vector = vectorizer.transform(lyric)
 
         similarities = []
-        for i, doc in enumerate(cleaned_lyrics):
-            doc_vector = vectorizer.transform(doc)
-            similarity = cs(verse_vector, doc_vector)
+        for i, doc in enumerate(doc_vector):
+
+            similarity = cs(verse_vector, doc)
             similarities.append((i, similarity))
         similarities.sort(key=lambda x: x[1], reverse=True)
         
@@ -200,7 +223,7 @@ class TrackIdentificationAPI(APIView):
             if scores > 0.1:
                 track_identified.append(NewTrackLyric.objects.get(id=i+1))
         
-        track_identified = track_identified[0:5]
+        track_identified = track_identified[0:4]
         serializer = NewTrackSerializer(track_identified, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({'message': 'Your query is vague'})
