@@ -114,7 +114,7 @@ def get_music_index(score):
 
 #Genre-based Recommendation
 
-with open("./music_models/music_recommendation_model.pkl", "rb") as f:
+with open("./music_models/music_recommendation_model_mock_up.pkl", "rb") as f:
     encoder , encoded_data = pickle.load(f)
 
 class MusicRecommendationAPI(APIView):
@@ -130,8 +130,8 @@ class MusicRecommendationAPI(APIView):
         id = python_data.get('id')
 
         track = TrackLyric.objects.get(id=id)
-        tracks = TrackLyric.objects.all()
-        documents = [t.genre  for t in tracks]
+        # tracks = TrackLyric.objects.all()
+        # documents = [t.genre  for t in tracks]
 
         genre_encoded = encoder.transform(genre)
         similarities = []
@@ -159,7 +159,7 @@ class MusicRecommendationAPI(APIView):
         for i, scores in similarities:
             # print(i)
             if scores > 0.7:
-                music.append(TrackLyric.objects.get(id=i+1))
+                music.append(NewTrackLyric.objects.get(id=i+1))
 
         unique_objects_dict = {}
 
@@ -181,7 +181,7 @@ class MusicRecommendationAPI(APIView):
             return Response({'message': 'Nothing to Recommend'}, status=status.HTTP_404_NOT_FOUND)
         # music = music[0:5]   
         # print(len(music))
-        serializer = TrackSerializer(unique_objects[0:4], many=True)
+        serializer = NewTrackSerializer(unique_objects[0:6], many=True)
         # print(serializer)
         return Response(serializer.data, status=status.HTTP_200_OK)
         

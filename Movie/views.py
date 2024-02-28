@@ -21,7 +21,7 @@ from nltk.corpus import stopwords
 from .tfidf import TFIDFVectorizer, cosine_similarity as calculate
 from .onehotencode import OneHotEncoder
 import nltk
-nltk.download('stopwords')
+# nltk.download('stopwords')
 # Create your views here.
 
 # print(Quote.objects.get(id=64))
@@ -260,11 +260,10 @@ def get_movie_index(score):
 
 
 import pickle
+with open("./movie_models/movie_scratch_model_mock_up.pkl", 'rb') as f:
+    vectorizer, document_vectors = pickle.load(f)
 
-with open("./movie_models/movie_scratch_model.pkl", 'rb') as f:
-    vectorizer = pickle.load(f)
-
-
+#Movie Identification using TFIDF and Cosine Similarity
 class MovieIdentificationAPI(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -281,11 +280,10 @@ class MovieIdentificationAPI(APIView):
         user = User.objects.get(id=user_id)
         # print(Quote.objects.get(id=64))
         # vectorizer = TFIDFVectorizer(quote)
-        movie_objects = DialogueMovie.objects.all()
-        movie_quotes = [ob.quote for ob in movie_objects]
+
         input_document = quote
         input_vector = vectorizer.transform(input_document)
-        document_vectors = [vectorizer.transform(q) for q in movie_quotes]
+
         # similarities = [cosine_similarity(input_vector, doc_vector) for doc_vector in document_vectors]
         similarities = []
         for i, doc_vector in enumerate(document_vectors):
@@ -299,7 +297,7 @@ class MovieIdentificationAPI(APIView):
         print(similarities[0:5])
         movie_identified = []
         for i, val in similarities:
-            if val >= 0.4:
+            if val >= 0.5:
                 movie_identified.append(DialogueMovie.objects.get(id=i+1))
         
         unique_objects_dict = {}
@@ -322,7 +320,7 @@ class MovieIdentificationAPI(APIView):
 
 with open('./movie_models/movie_recommend_model_II.pkl', 'rb') as f:
     encoder = pickle.load(f)
-
+# Recommendation using One Hot Encoding and Cosine Similarity
 class MovieRecommendationAPI(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -392,7 +390,7 @@ class MovieRecommendationAPI(APIView):
 
 
 
-#DialogueBasedSearch
+#DialogueBasedSearchSklearnCosineSimilarity
 class DialogueIdentifyMovieAPI(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
