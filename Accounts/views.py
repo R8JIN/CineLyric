@@ -10,8 +10,8 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
-from Song.models import TrackLyric
-from Movie.models import Quotation
+from Song.models import TrackLyric, NewTrackLyric
+from Movie.models import Quotation, DialogueMovie
 
 # Create your views here.
 
@@ -143,13 +143,13 @@ class BookmarkAPI(APIView):
         
         if b is None:
             if type == "music":
-                music = TrackLyric.objects.get(id=bid)
+                music = NewTrackLyric.objects.get(id=bid)
                 bookmark = Bookmark(user=user, bid=bid, type=type, title=music.track_name)
                 bookmark.save()
                 serializer = BookmarkSerializer(bookmark)
                 return Response([{"message": "Bookmarked"}, serializer.data])
             elif type == "movie":
-                movie = Quotation.objects.get(id=bid)
+                movie = DialogueMovie.objects.get(id=bid)
                 bookmark = Bookmark(user=user, bid=bid, type=type, title=movie.movie)
                 bookmark.save()
                 serializer = BookmarkSerializer(bookmark)

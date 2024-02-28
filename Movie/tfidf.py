@@ -1,7 +1,6 @@
-from nltk.tokenize import word_tokenize
+# from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
-import nltk
-nltk.download('stopwords')
+
 
 # Final Cosine similarity
 import re
