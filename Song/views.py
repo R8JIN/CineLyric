@@ -11,8 +11,8 @@ from .songTFIDF import TFIDFVectorizer, cosine_similarity as cosine
 from .tfidf import  OneHotEncoder, cosine_similarity as cs
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
-from .models import  BillBoardLyric, TrackLyric, NewTrackLyric
-from .serializer import  MusicSerializer, TrackSerializer, NewTrackSerializer
+from .models import  BillBoardLyric, TrackLyric, NewTrackLyric, SpotifyMusicLyric
+from .serializer import  MusicSerializer, TrackSerializer, NewTrackSerializer, SpotifyTrackSerializer
 from  rest_framework import status
 from rest_framework.authtoken.models import Token
 from Accounts.models import SearchHistory, User
@@ -69,10 +69,10 @@ class SongSelectionAPI(APIView):
             # song = SongLyric.objects.filter(pk__in = index)
             # songs = [SongLyric.objects.get(id=i) for i in index] #obsolete
             # serializer = SongSerializer(songs, many=True) #obsolete
-            music = [NewTrackLyric.objects.get(id=i) for i in index]
+            music = [SpotifyMusicLyric.objects.get(id=i) for i in index]
         
             new_music = music[0:5]
-            serializer = NewTrackSerializer(new_music, many=True)
+            serializer = SpotifyTrackSerializer(new_music, many=True)
             
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({'message':'Your query is very vague'}, status=status.HTTP_404_NOT_FOUND)
@@ -129,7 +129,7 @@ class MusicRecommendationAPI(APIView):
         print(genre)
         id = python_data.get('id')
 
-        track = TrackLyric.objects.get(id=id)
+        track = SpotifyMusicLyric.objects.get(id=id)
         # tracks = TrackLyric.objects.all()
         # documents = [t.genre  for t in tracks]
 
@@ -159,7 +159,7 @@ class MusicRecommendationAPI(APIView):
         for i, scores in similarities:
             # print(i)
             if scores > 0.7:
-                music.append(NewTrackLyric.objects.get(id=i+1))
+                music.append(SpotifyMusicLyric.objects.get(id=i+1))
 
         unique_objects_dict = {}
 
@@ -176,12 +176,12 @@ class MusicRecommendationAPI(APIView):
 
         
         unique_objects = list(unique_objects_dict.values())
-        recommend = [u for u in unique_objects if u.release_date>=track.release_date]
+        recommend = [u for u in unique_objects if u.release_date>=track.release_date] #same year 
         if len(recommend) == 0:
             return Response({'message': 'Nothing to Recommend'}, status=status.HTTP_404_NOT_FOUND)
         # music = music[0:5]   
         # print(len(music))
-        serializer = NewTrackSerializer(unique_objects[0:8], many=True)
+        serializer = SpotifyTrackSerializer(unique_objects[0:8], many=True)
         # print(serializer)
         return Response(serializer.data, status=status.HTTP_200_OK)
         
@@ -221,11 +221,11 @@ class TrackIdentificationAPI(APIView):
         for i, scores in similarities:
             # print(i)
             if scores > 0.1:
-                track_identified.append(NewTrackLyric.objects.get(id=i+1))
+                track_identified.append(SpotifyMusicLyric.objects.get(id=i+1))
         
         track_identified = track_identified[0:4]
         if len(track_identified) != 0:
-            serializer = NewTrackSerializer(track_identified, many=True)
+            serializer = SpotifyTrackSerializer(track_identified, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({'message': 'Your query is vague'})
 

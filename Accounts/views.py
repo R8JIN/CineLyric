@@ -153,7 +153,6 @@ class BookmarkAPI(APIView):
                 bookmark = Bookmark(user=user, bid=bid, type=type, title=movie.movie)
                 bookmark.save()
                 serializer = BookmarkSerializer(bookmark)
-
                 return Response([{"message": "Bookmarked"}, serializer.data])
             
             """"
@@ -224,3 +223,8 @@ Request for DELETE Bookmark
             b.delete()
             return Response({"message": "Bookmark Deleted"})
         return Response({"message":"No item to delete"}, status=status.HTTP_404_NOT_FOUND)
+    
+
+class BookmarkDetail(APIView):
+    def get(self, view):
+        pass
