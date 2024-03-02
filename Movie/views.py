@@ -260,9 +260,11 @@ def get_movie_index(score):
 
 
 import pickle
-with open("./movie_models/movie_scratch_model_mock_up.pkl", 'rb') as f:
-    vectorizer, document_vectors = pickle.load(f)
+# with open("./movie_models/movie_scratch_model_mock_up.pkl", 'rb') as f:
+#     vectorizer, document_vectors = pickle.load(f)
 
+with open("./movie_models/movie_module_stemming.pkl", 'rb') as f:
+    vectorizer, document_vectors = pickle.load(f)
 #Movie Identification using TFIDF and Cosine Similarity
 class MovieIdentificationAPI(APIView):
     authentication_classes = [TokenAuthentication]

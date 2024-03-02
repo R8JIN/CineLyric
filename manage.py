@@ -20,6 +20,6 @@ def main():
 
 if __name__ == '__main__':
     from Song.tfidf import TFIDFVectorizer
-    from Movie.tfidf import TFIDFVectorizer
+    from Movie.tfidf import TFIDFVectorizer, SimpleStemmer
     from Movie.onehotencode import OneHotEncoder
     main()
