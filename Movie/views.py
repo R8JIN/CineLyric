@@ -318,8 +318,8 @@ class MovieIdentificationAPI(APIView):
     
 
 
-with open('./movie_models/movie_recommend_model_II.pkl', 'rb') as f:
-    encoder = pickle.load(f)
+with open('./movie_models/defense_movie_recommend_model.pkl', 'rb') as f:
+    encoder, encoded_data = pickle.load(f)
 # Recommendation using One Hot Encoding and Cosine Similarity
 class MovieRecommendationAPI(APIView):
     authentication_classes = [TokenAuthentication]
@@ -336,24 +336,24 @@ class MovieRecommendationAPI(APIView):
         id_movie = DialogueMovie.objects.get(id=id)
         # s = set()
         # # s.update(genre.split(','))
-        movie_ob = DialogueMovie.objects.all()
-        movie_genre = [ob.genre for ob in movie_ob]
+        # movie_ob = DialogueMovie.objects.all()
+        # movie_genre = [ob.genre for ob in movie_ob]
         #Token Authentication
         user_id = Token.objects.get(key=request.auth.key).user_id
         user = User.objects.get(id=user_id)
 
-        genres = set()
-        for item in movie_genre:
-            genres.update(item.split(','))
-
+        # genres = set()
+        # for item in movie_genre:
+        #     genres.update(item.split(','))
+        # print(genres)
         
 
         genre_encoded = encoder.transform(genre)
         print("genre encoded: ", genre_encoded)
         # Perform one-hot encoding
-        encoded_data = []
-        for item in movie_genre:
-            encoded_data.append(encoder.transform(item))
+        # encoded_data = []
+        # for item in movie_genre:
+        #     encoded_data.append(encoder.transform(item))
         print(encoded_data[0])
         similarities = []
         for i, doc in enumerate(encoded_data):
@@ -361,7 +361,7 @@ class MovieRecommendationAPI(APIView):
              similarities.append((i, similarity))
 
         similarities.sort(key=lambda x: x[1], reverse=True)
-        print(similarities)
+        # print(similarities)
 
         movie_recommend = []
         for i, val in similarities:
@@ -442,4 +442,19 @@ class DialogueIdentifyMovieAPI(APIView):
 
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response({'messsage': 'Your query is vague to system'}, status=status.HTTP_404_NOT_FOUND )
-    
+
+
+
+
+
+        
+
+def genre_cleaning(genres):
+    set_genres = set()
+    for item in genres:
+        set_genres.update(item.split(','))
+    # print(genres)
+    cleaned_data = []
+    for g in set_genres:
+        cleaned_data.append(g.lstrip())
+    return cleaned_data

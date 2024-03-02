@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from Accounts.views import RegistrationAPI, LoginAPI, SearchHistoryAPI, BookmarkAPI
+from Accounts.views import RegistrationAPI, LoginAPI, SearchHistoryAPI, BookmarkAPI, BookmarkRecommendationAPI, BookmarkDetailAPI
 from Movie.views import MovieSelectionAPI, MovieHistoryAPI, MoviePlotAPI, MovieIdentificationAPI, MovieRecommendationAPI, DialogueIdentifyMovieAPI
 from Song.views import SongSelectionAPI, MusicRecommendationAPI, TrackIdentificationAPI
 
@@ -37,5 +37,7 @@ urlpatterns = [
     path('track/', TrackIdentificationAPI.as_view(), name='TrackAPI'), 
     path('api/movie/', MovieIdentificationAPI.as_view(), name='MovieIdAPi'), # new api for dialogue-based search
     path('api/movieSearch/', DialogueIdentifyMovieAPI.as_view(), name='MoiveSearchAPI'), #new api for dialogue-based search II
-    path('api/recommend/', MovieRecommendationAPI.as_view(), name='MovieRecommend') # recommend movie
+    path('api/recommend/', MovieRecommendationAPI.as_view(), name='MovieRecommend'), # recommend movie
+    path('api/bookmarkRecommend/', BookmarkRecommendationAPI.as_view(), name='BookmarkRecommendation'), #bookmark recommendation
+    path('api/bookmarkDetail/', BookmarkDetailAPI.as_view(), name='BookmarkDetail'), #Bookmark Details
 ]

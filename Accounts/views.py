@@ -12,7 +12,10 @@ from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from Song.models import TrackLyric, NewTrackLyric
 from Movie.models import Quotation, DialogueMovie
-
+from Movie.serializer import DialogueMovieSerializer
+from Song.serializer import NewTrackSerializer
+import pickle
+from Movie.tfidf import cosine_similarity as calculate
 # Create your views here.
 
 
@@ -216,15 +219,115 @@ Request for DELETE Bookmark
         json_data = request.body
         stream = io.BytesIO(json_data)
         python_data = JSONParser().parse(stream)
-        bid = python_data.get('id')
+        bookmark_id = python_data.get('id')
 
-        b = Bookmark.objects.filter(id=bid, user=user).first()
+        b = Bookmark.objects.filter(id=bookmark_id, user=user).first()
         if b is not None:
             b.delete()
             return Response({"message": "Bookmark Deleted"})
         return Response({"message":"No item to delete"}, status=status.HTTP_404_NOT_FOUND)
     
 
-class BookmarkDetail(APIView):
-    def get(self, view):
-        pass
+class BookmarkDetailAPI(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        user_id = Token.objects.get(key=request.auth.key).user_id
+        user = User.objects.get(id=user_id)
+        json_data = request.body
+        stream = io.BytesIO(json_data)
+        python_data = JSONParser().parse(stream)
+        bid = python_data.get('bid')
+        type = python_data.get('type')
+
+        if type == 'movie':
+            movie = DialogueMovie.objects.get(id=bid)
+            serializer = DialogueMovieSerializer(movie)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        if type == 'music':
+            music= NewTrackLyric.objects.get(id=bid)
+            serializer = NewTrackSerializer(music)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+
+
+with open('./movie_models/defense_movie_TFIDF_recommend.pkl', 'rb') as f:
+    movie_vectorizer, movie_vectorizer_data = pickle.load(f)
+
+
+class BookmarkRecommendationAPI(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        json_data = request.body
+        stream = io.BytesIO(json_data)
+        python_data = JSONParser().parse(stream)
+        type = python_data.get('type')
+
+        user_id = Token.objects.get(key=request.auth.key).user_id
+        user = User.objects.get(id=user_id)
+
+        if type == "movie":
+            bookmarks = Bookmark.objects.filter(user=user, type="movie")
+            if bookmarks is not None:
+                movies = [DialogueMovie.objects.get(id=bookmark.bid) for bookmark in bookmarks]
+                genres = [movie.genre for movie in movies]
+                cleaned_data = clean_genre(genres)
+                print(cleaned_data)
+                b_genre_encoded = movie_vectorizer.transform(cleaned_data)
+
+                print(movie_vectorizer_data[0])
+                similarities = []
+                for i, doc in enumerate(movie_vectorizer_data):
+                    similarity = calculate(b_genre_encoded, doc)
+                    similarities.append((i, similarity))
+
+                similarities.sort(key=lambda x: x[1], reverse=True)
+                # print(similarities)
+
+                movie_recommend = []
+                
+
+                for i, val in similarities:
+                    movie_recommend.append(DialogueMovie.objects.get(id=i+1))
+                
+                unique_objects_dict = {}
+
+                
+                for obj in movie_recommend:
+                    normalized_name = ' '.join(obj.movie.split())
+                    lowercase_name = normalized_name.lower().strip()
+                    unique_objects_dict[lowercase_name] = obj
+
+                # print(list(unique_objects_dict.keys())[0:4])
+                keys = []
+                for movie in movies:
+                    normalized_name = ' '.join(movie.movie.split())
+                    lowercase_name = normalized_name.lower().strip()
+                    keys.append(lowercase_name)
+
+                for key in keys:
+                    unique_objects_dict.pop(key, None)
+                unique_objects = list(unique_objects_dict.values())
+                recommend = [u for u in unique_objects]
+                if len(recommend) == 0:
+                    return Response({'message': 'Nothing to Recommend'}, status=status.HTTP_404_NOT_FOUND)
+                serializer = DialogueMovieSerializer(recommend[0:4], many=True )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({'message':'Nothing to recommend'}, status=status.HTTP_404_NOT_FOUND)
+        
+
+
+
+
+
+def clean_genre(genres):
+    set_genres = set()
+    for item in genres:
+        set_genres.update(item.split(','))
+    # print(genres)
+    cleaned_set = {item.strip() for item in set_genres}
+    print(cleaned_set)
+    return ', '.join(list(cleaned_set))
