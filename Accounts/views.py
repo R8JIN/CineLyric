@@ -252,8 +252,22 @@ class BookmarkDetailAPI(APIView):
 
 
 
-with open('./movie_models/defense_movie_TFIDF_recommend.pkl', 'rb') as f:
+with open('./movie_models/bookmark_recommendation_count.pkl', 'rb') as f:
     movie_vectorizer, movie_vectorizer_data = pickle.load(f)
+
+with open('./music_models/music_bookmark_recommendation_defense.pkl', 'rb') as fm:
+    music_vectorizer, music_vectorizer_data = pickle.load(fm)
+
+
+#for movie bookmark recommendation
+"""{
+    "type": "movie"
+}"""
+
+#for movie bookmark recommendation
+"""{
+    "type": "music"
+}"""
 
 
 class BookmarkRecommendationAPI(APIView):
@@ -274,11 +288,11 @@ class BookmarkRecommendationAPI(APIView):
             if bookmarks is not None:
                 movies = [DialogueMovie.objects.get(id=bookmark.bid) for bookmark in bookmarks]
                 genres = [movie.genre for movie in movies]
-                cleaned_data = clean_genre(genres)
-                print(cleaned_data)
-                b_genre_encoded = movie_vectorizer.transform(cleaned_data)
+                recommend_genres =', '.join(genres)
+                print(recommend_genres)
+               
+                b_genre_encoded = movie_vectorizer._transform([recommend_genres])
 
-                print(movie_vectorizer_data[0])
                 similarities = []
                 for i, doc in enumerate(movie_vectorizer_data):
                     similarity = calculate(b_genre_encoded, doc)
@@ -317,17 +331,64 @@ class BookmarkRecommendationAPI(APIView):
                 serializer = DialogueMovieSerializer(recommend[0:4], many=True )
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response({'message':'Nothing to recommend'}, status=status.HTTP_404_NOT_FOUND)
-        
+        elif type == "music":
+            bookmarks = Bookmark.objects.filter(user=user, type="music")
+            if bookmarks is not None:
+                tracks = [NewTrackLyric.objects.get(id=bookmark.bid) for bookmark in bookmarks]
+                genres = [track.genre for track in tracks]
+                recommend_genres =', '.join(genres)
+                print(recommend_genres)
+               
+                b_genre_encoded = music_vectorizer._transform([recommend_genres])
+
+                similarities = []
+                for i, doc in enumerate(music_vectorizer_data):
+                    similarity = calculate(b_genre_encoded, doc)
+                    similarities.append((i, similarity))
+
+                similarities.sort(key=lambda x: x[1], reverse=True)
+                # print(similarities)
+
+                music_recommend = []
+                
+
+                for i, val in similarities:
+                    music_recommend.append(NewTrackLyric.objects.get(id=i+1))
+                
+                unique_objects_dict = {}
+
+                
+                for obj in music_recommend:
+                    normalized_name = ' '.join(obj.track_name.split())
+                    lowercase_name = normalized_name.lower().strip()
+                    unique_objects_dict[lowercase_name] = obj
+
+                # print(list(unique_objects_dict.keys())[0:4])
+                keys = []
+                for track in tracks:
+                    normalized_name = ' '.join(track.track_name.split())
+                    lowercase_name = normalized_name.lower().strip()
+                    keys.append(lowercase_name)
+
+                for key in keys:
+                    unique_objects_dict.pop(key, None)
+                unique_objects = list(unique_objects_dict.values())
+                recommend = [u for u in unique_objects]
+                if len(recommend) == 0:
+                    return Response({'message': 'Nothing to Recommend'}, status=status.HTTP_404_NOT_FOUND)
+                serializer = NewTrackSerializer(recommend[0:4], many=True )
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({'message':'Nothing to recommend'}, status=status.HTTP_404_NOT_FOUND)
 
 
 
 
 
-def clean_genre(genres):
-    set_genres = set()
-    for item in genres:
-        set_genres.update(item.split(','))
-    # print(genres)
-    cleaned_set = {item.strip() for item in set_genres}
-    print(cleaned_set)
-    return ', '.join(list(cleaned_set))
+# def clean_genre(genres):
+#     set_genres = set()
+#     for item in genres:
+#         set_genres.update(item.split(','))
+#     # print(genres)
+#     cleaned_set = {item.strip() for item in set_genres}
+#     print(cleaned_set)
+#     return ', '.join(list(cleaned_set))
