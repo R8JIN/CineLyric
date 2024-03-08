@@ -285,7 +285,8 @@ class BookmarkRecommendationAPI(APIView):
 
         if type == "movie":
             bookmarks = Bookmark.objects.filter(user=user, type="movie")
-            if bookmarks is not None:
+            print(bookmarks)
+            if bookmarks:
                 movies = [DialogueMovie.objects.get(id=bookmark.bid) for bookmark in bookmarks]
                 genres = [movie.genre for movie in movies]
                 recommend_genres =', '.join(genres)
@@ -333,7 +334,8 @@ class BookmarkRecommendationAPI(APIView):
             return Response({'message':'Nothing to recommend'}, status=status.HTTP_404_NOT_FOUND)
         elif type == "music":
             bookmarks = Bookmark.objects.filter(user=user, type="music")
-            if bookmarks is not None:
+            if bookmarks:
+                print(bookmarks)
                 tracks = [SpotifyMusicLyric.objects.get(id=bookmark.bid) for bookmark in bookmarks]
                 genres = [track.genre for track in tracks]
                 recommend_genres =', '.join(genres)
