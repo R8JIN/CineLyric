@@ -10,10 +10,10 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
-from Song.models import TrackLyric, NewTrackLyric
+from Song.models import SpotifyMusicLyric
 from Movie.models import Quotation, DialogueMovie
 from Movie.serializer import DialogueMovieSerializer
-from Song.serializer import NewTrackSerializer
+from Song.serializer import SpotifyTrackSerializer
 import pickle
 from Movie.tfidf import cosine_similarity as calculate
 # Create your views here.
@@ -146,7 +146,7 @@ class BookmarkAPI(APIView):
         
         if b is None:
             if type == "music":
-                music = NewTrackLyric.objects.get(id=bid)
+                music = SpotifyMusicLyric.objects.get(id=bid)
                 bookmark = Bookmark(user=user, bid=bid, type=type, title=music.track_name)
                 bookmark.save()
                 serializer = BookmarkSerializer(bookmark)
@@ -244,8 +244,8 @@ class BookmarkDetailAPI(APIView):
             serializer = DialogueMovieSerializer(movie)
             return Response(serializer.data, status=status.HTTP_200_OK)
         if type == 'music':
-            music= NewTrackLyric.objects.get(id=bid)
-            serializer = NewTrackSerializer(music)
+            music= SpotifyMusicLyric.objects.get(id=bid)
+            serializer = SpotifyTrackSerializer(music)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -334,7 +334,7 @@ class BookmarkRecommendationAPI(APIView):
         elif type == "music":
             bookmarks = Bookmark.objects.filter(user=user, type="music")
             if bookmarks is not None:
-                tracks = [NewTrackLyric.objects.get(id=bookmark.bid) for bookmark in bookmarks]
+                tracks = [SpotifyMusicLyric.objects.get(id=bookmark.bid) for bookmark in bookmarks]
                 genres = [track.genre for track in tracks]
                 recommend_genres =', '.join(genres)
                 print(recommend_genres)
@@ -353,7 +353,7 @@ class BookmarkRecommendationAPI(APIView):
                 
 
                 for i, val in similarities:
-                    music_recommend.append(NewTrackLyric.objects.get(id=i+1))
+                    music_recommend.append(SpotifyMusicLyric.objects.get(id=i+1))
                 
                 unique_objects_dict = {}
 
@@ -376,7 +376,7 @@ class BookmarkRecommendationAPI(APIView):
                 recommend = [u for u in unique_objects]
                 if len(recommend) == 0:
                     return Response({'message': 'Nothing to Recommend'}, status=status.HTTP_404_NOT_FOUND)
-                serializer = NewTrackSerializer(recommend[0:4], many=True )
+                serializer = SpotifyTrackSerializer(recommend[0:4], many=True )
                 return Response(serializer.data, status=status.HTTP_200_OK)
             return Response({'message':'Nothing to recommend'}, status=status.HTTP_404_NOT_FOUND)
 

@@ -11,8 +11,8 @@ from .songTFIDF import TFIDFVectorizer, cosine_similarity as cosine
 from .tfidf import  OneHotEncoder, cosine_similarity as cs
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
-from .models import  BillBoardLyric, TrackLyric, NewTrackLyric, SpotifyMusicLyric
-from .serializer import  MusicSerializer, TrackSerializer, NewTrackSerializer, SpotifyTrackSerializer
+from .models import   NewTrackLyric, SpotifyMusicLyric
+from .serializer import   NewTrackSerializer, SpotifyTrackSerializer
 from  rest_framework import status
 from rest_framework.authtoken.models import Token
 from Accounts.models import SearchHistory, User
