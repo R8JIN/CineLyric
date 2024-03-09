@@ -282,7 +282,9 @@ class MovieIdentificationAPI(APIView):
         user = User.objects.get(id=user_id)
         # print(Quote.objects.get(id=64))
         # vectorizer = TFIDFVectorizer(quote)
-
+        user_history = SearchHistory(user=user, user_query=quote, search_type="movie")
+        print(user_history)
+        user_history.save()
         input_document = quote
         input_vector = vectorizer.transform(input_document)
 
@@ -407,6 +409,12 @@ class DialogueIdentifyMovieAPI(APIView):
         #Token Authentication
         user_id = Token.objects.get(key=request.auth.key).user_id
         user = User.objects.get(id=user_id)
+
+        # print(Quote.objects.get(id=64))
+        # vectorizer = TFIDFVectorizer(quote)
+        user_history = SearchHistory(user=user, user_query=quote, search_type="movie")
+        print(user_history)
+        user_history.save()
         # print(Quote.objects.get(id=64))
         #Reading module from the pickle
         with open('./movie_models/movie_vector_module.pkl', 'rb') as f:

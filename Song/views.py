@@ -7,8 +7,9 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 import pickle
-from .songTFIDF import TFIDFVectorizer, cosine_similarity as cosine
-from .tfidf import  OneHotEncoder, cosine_similarity as cs
+from Movie.tfidf import TFIDFVectorizer as MovieTFIDF
+from .songTFIDF import TFIDFVectorizer , cosine_similarity as cosine
+from .tfidf import TFIDFVectorizer as SongTFIDF, OneHotEncoder, cosine_similarity as cs
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from .models import   NewTrackLyric, SpotifyMusicLyric
@@ -171,10 +172,7 @@ class MusicRecommendationAPI(APIView):
             normalized_name = ' '.join(obj.track_name.split())
             lowercase_name = normalized_name.lower().strip()
             unique_objects_dict[lowercase_name] = obj
-
-
-
-        
+       
         unique_objects = list(unique_objects_dict.values())
         recommend = [u for u in unique_objects if u.release_date>=track.release_date] #same year 
         if len(recommend) == 0:
@@ -185,9 +183,11 @@ class MusicRecommendationAPI(APIView):
         # print(serializer)
         return Response(serializer.data, status=status.HTTP_200_OK)
         
-       
 with open("./music_models/track_model_for_mock_up.pkl", "rb") as f:
-    vectorizer, doc_vector = pickle.load(f)
+    vectorizer, doc_vector = pickle.load(f)      
+
+if isinstance(vectorizer, MovieTFIDF):
+    vectorizer = SongTFIDF(documents=vectorizer.documents)
 
 
 class TrackIdentificationAPI(APIView):
@@ -200,6 +200,8 @@ class TrackIdentificationAPI(APIView):
         stream = io.BytesIO(json_data)
         python_data = JSONParser().parse(stream)
         lyric = python_data.get('lyric')
+        user_id = Token.objects.get(key=request.auth.key).user_id
+        user = User.objects.get(id=user_id)
 
         # track = NewTrackLyric.objects.all()
         # track_lyric = [t.lyrics for t in track]
@@ -207,6 +209,10 @@ class TrackIdentificationAPI(APIView):
 
         # print(cleaned_lyrics[0])
         verse_vector = vectorizer.transform(lyric)
+        music_history = SearchHistory(user=user, user_query=lyric,
+                                          search_type='music')
+        
+        music_history.save()
 
         similarities = []
         for i, doc in enumerate(doc_vector):

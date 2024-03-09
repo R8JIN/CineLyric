@@ -91,13 +91,15 @@ class TFIDFVectorizer:
     def build_vocab(self):
         vocab = set()
         for doc in self.documents:
-            words = [self.stemmer.stem(re.sub(r'[^\w\s]', '', word.lower())) for word in doc.split() if word.lower() not in self.stop_words]
+            words = [self.stemmer.stem(re.sub(r'[^\w\s]', '', word.lower())) for word in doc.split() 
+                     if word.lower() not in self.stop_words]
             vocab.update(words)
         return sorted(vocab)
 
     def calculate_tf(self, document): #term-frequency
         tf = {}
-        words = [self.stemmer.stem(re.sub(r'[^\w\s]', '', word.lower())) for word in document.split() if word.lower() not in self.stop_words]
+        words = [self.stemmer.stem(re.sub(r'[^\w\s]', '', word.lower())) for word in document.split()
+                  if word.lower() not in self.stop_words]
         word_count = len(words)
         for word in words:
             tf[word] = tf.get(word, 0) + 1 / word_count
@@ -107,7 +109,8 @@ class TFIDFVectorizer:
         idf = {}
         num_documents = len(self.documents)
         for word in self.vocab:
-            word_count = sum(1 for doc in self.documents if self.stemmer.stem(word.lower()) in [self.stemmer.stem(w) for w in doc.lower().split()])
+            word_count = sum(1 for doc in self.documents if self.stemmer.stem(word.lower()) 
+                             in [self.stemmer.stem(w) for w in doc.lower().split()])
             idf[word] = np.log(num_documents / (word_count + 1))
         return idf
 
