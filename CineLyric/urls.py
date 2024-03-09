@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from Accounts.views import RegistrationAPI, LoginAPI, SearchHistoryAPI, BookmarkAPI, BookmarkRecommendationAPI, BookmarkDetailAPI
-from Movie.views import MovieSelectionAPI, MovieHistoryAPI, MoviePlotAPI, MovieIdentificationAPI, MovieRecommendationAPI, DialogueIdentifyMovieAPI
+from Movie.views import  MovieHistoryAPI, MoviePlotAPI, MovieIdentificationAPI, MovieRecommendationAPI, DialogueIdentifyMovieAPI
 from Song.views import SongSelectionAPI, MusicRecommendationAPI, TrackIdentificationAPI
 
 # router = DefaultRouter()
@@ -27,7 +27,7 @@ urlpatterns = [
     path('registration/', RegistrationAPI.as_view(), name="Registration"), # Registration API
     path('login/', LoginAPI.as_view(), name="Login"), # Login API
     
-    path('movie/', MovieSelectionAPI.as_view(), name="Movie"),#obsolete 
+    # path('movie/', MovieSelectionAPI.as_view(), name="Movie"),#obsolete 
     path('song/', SongSelectionAPI.as_view(), name='SongAPI'), # lyric-based search
     path('moviehistory/', MovieHistoryAPI.as_view(), name="MovieHistory"), # obsolete
     path('history/', SearchHistoryAPI.as_view(), name="SearhHistory"), # Search history url
